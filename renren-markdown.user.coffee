@@ -1,8 +1,8 @@
 `
 // ==UserScript==
 // @name            renren-markdown
-// @include         *blog.renren.com/blog/*/editBlog
-// @include         *blog.renren.com/NewEntry.do
+// @include         *blog.renren.com/blog/*/*Blog*
+// @version         0.1.5
 // ==/UserScript==
 `
 
@@ -36,18 +36,24 @@ injectScript ->
         if (codeEl=preEl?.firstElementChild)?.tagName=='CODE'
           content=codeEl.innerHTML
           content=content.replace(/\ /g, '&nbsp;').replace(/[\r\n]/g, '<br />')
-          spanEl=document.createElement('span')
-          spanEl.style.fontFamily="Consolas, 'Courier New', Monospace, Courier"
-          spanEl.style.lineHeight="100%"
-          spanEl.innerHTML=content
-          codeEl.innerHTML=spanEl.outerHTML
+          presEl=document.createElement('span')
+          presEl.style.fontFamily="Consolas, 'Courier New', Monospace, Courier"
+          presEl.style.lineHeight="100%"
+          presEl.innerHTML=content
+          codeEl.innerHTML=presEl.outerHTML
           preEl.parentElement.replaceChild(codeEl, preEl)
 
-      #header: font-size restoration
+      #header: replace with presentation element
       fontSizeList=['', '2em', '1.5em', '1.17em', '1em', '0.83em', '0.67em']
       for i in [1..6]
-        for hEl in el.getElementsByTagName('h'+i)
-          hEl.style.fontSize=fontSizeList[i];
+        for hEl in [].slice.call(el.getElementsByTagName('h'+i))
+          presEl=document.createElement('span')
+          presEl.innerHTML=hEl.innerHTML
+          presEl.style.fontSize=fontSizeList[i]
+          presEl.style.fontWeight='bold'
+          presEl.style.display='block'
+          presEl.style.marginTop='1em'
+          hEl.parentElement.replaceChild(presEl, hEl)
 
       el.innerHTML
 
@@ -65,10 +71,11 @@ injectScript ->
       try return b64_to_str(b64) catch e then return ''
 
 
+    #minimalistic UI
     @uiHtml=
       """
       <div id="rrmd_wrapper" style="margin: 0em 0em 1em 0em">
-        <textarea id="rrmd_area" style="font-family: Consolas, 'Courier New';"></textarea>
+        <textarea id="rrmd_area" style="font-family: Consolas, 'Courier New';" placeholder="Type markdown _here_!"></textarea>
       </div>
       """
     @uiSpanEl=document.createElement('span')
@@ -81,6 +88,14 @@ injectScript ->
       if @tid? then clearTimeout(@tid); @tid=null;
       @tid=setTimeout (@fill()), Math.min(@uiAreaEl.value.length/50, 500)
 
+    #2012-12-20 fix: fuck renren's position:absolute blog title input
+    titleBgEl=document.getElementById('title_bg')
+    titleBgEl?.style.cssText='position: inherit !important; width: 100%'
+    titleEl=document.getElementById('title')
+    titleEl?.style.cssText='width: 98%'
+
+    #2012-12-30 fix: remove old tinymce padding (used to make room for the offset title)
+    document.getElementById('editor_ifr').contentDocument.body.style.paddingTop="0px"
 
     #markdown from textarea => tinymce
     @fill=->
