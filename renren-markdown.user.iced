@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         renren-markdown
 // @namespace    http://github.com/smilekzs
-// @version      0.4.8
+// @version      0.4.11
 // @description  write well-formatted blogs on renren.com with markdown
 // @include      *blog.renren.com/blog/*Blog*
 // @include      *blog.renren.com/*Entry*
@@ -46,6 +46,10 @@ getCssRules=(css)->
   JQ(doc).find('head').append(JQ("<style>#{css}</style>"))
   doc.styleSheets[0].cssRules
 
+# escape cssText to avoid single-double-quote hell
+escapeCssText=(cssText)->
+  cssText.replace /"/g, "'"
+
 # inline css rules into element `el`
 inlineCss=(el, cssRules)->
   jel=JQ(el)
@@ -56,7 +60,7 @@ inlineCss=(el, cssRules)->
     list=jel[0]?.querySelectorAll(rule.selectorText)
     if list?
       [].slice.call(list).forEach (x)->
-        x.style.cssText="#{rule.style.cssText};"+x.style.cssText
+        x.style.cssText="#{escapeCssText rule.style.cssText};"+escapeCssText x.style.cssText
   jel
 
 # convert everything within `el` into <span>
@@ -66,7 +70,7 @@ spanifyAll=(el)->
   # clone `el` with raw span element
   spanify=(el)->
     if !el? then return JQ('<span />')
-    JQ("""<span style="#{el.style.cssText}">#{el.innerHTML}</span>""")
+    JQ("""<span style="#{escapeCssText el.style.cssText}">#{el.innerHTML}</span>""")
 
   # preformatted text: replace with `&amp;` and friends
   jel.find('pre').each (i, x)->
@@ -112,7 +116,7 @@ spanifyAll=(el)->
     jel.find(tag).each (i, x)->
       st=x.style.cssText
       x.style.cssText=''
-      JQ(x).wrap("""<span style="#{st}"/>""")
+      JQ(x).wrap("""<span style="#{escapeCssText st}"/>""")
 
   return
 
@@ -129,7 +133,7 @@ getGist=(id, cb)->
     onload: defer(gistJsRes)
     onerror: (err)->cb err; throw err
   }
-  gistJs=gistJsRes.response
+  gistJs=gistJsRes.responseText
 
   cssUrl=gistJs.match(/link href=\\"([^"]*)\\"/)?[1]
   if !cssUrl
@@ -143,7 +147,7 @@ getGist=(id, cb)->
     onload: defer(gistCssRes)
     onerror: (err)->cb err; throw err
   }
-  gistCss=gistCssRes.response
+  gistCss=gistCssRes.responseText
 
   i1=gistJs.indexOf("\n")
   i1=gistJs.indexOf("('", i1)+1
@@ -168,10 +172,10 @@ unsafeWindow.gistManager=gistManager=
       cb err; throw err
     else
       if !cssRules? then cssRules=getCssRules(gistCss)
-      el=JQ(gistHtml).wrap('<span />').parent()
-      # FIXME: special handling of a display bug when some lines are long and force-wrapped
+      el=JQ(gistHtml).wrap('<span />').parent().css('display', 'none').appendTo JQ('body')
       inlineCss el, cssRules
       spanifyAll el
+      el.css('display', '')
       cb null, @saved[id]=el 
 
 # } //module getGist
