@@ -1,25 +1,31 @@
 `
 // vim: nowrap
+// Copyright (c) 2013, smilekzs. (MIT Licensed)
 // ==UserScript==
-// @name         renren-markdown
-// @namespace    http://github.com/smilekzs
-// @version      0.4.11
-// @description  write well-formatted blogs on renren.com with markdown
-// @include      *blog.renren.com/blog/*Blog*
-// @include      *blog.renren.com/*Entry*
+// @name          renren-markdown
+// @namespace     http://github.com/smilekzs
+// @version       0.4.16
+// @description   write well-formatted blogs on renren.com with markdown
+// @include       *blog.renren.com/blog/*Blog*
+// @include       *blog.renren.com/*Entry*
 // ==/UserScript==
+
+//#include
 `
 
-`
-/*jquery*/
-/*marked*/
-`
-rrmdStyle=
-  '''
-pre, code { font-size: 1em; font-family:Consolas, Inconsolata, Courier, monospace; } code { white-space:nowrap; border:1px solid #EAEAEA; background-color:#F8F8F8; border-radius:3px; display:inline; margin:0 .15em; padding:0 .3em; } pre { font-size:1em; line-height:1.2em; overflow:auto; } pre code { white-space:pre; border-radius:3px; border:1px solid #CCC; padding:.5em .7em; display: block !important; } p, blockquote, ul, ol, dl, li, table, pre { margin:1em 0; } dl { padding:0; } dl dt { font-size:1em; font-weight:700; font-style:italic; margin:1em 0 .4em; padding:0; } dl dd { margin:0 0 1em; padding:0 1em; } blockquote { border-left:4px solid #DDD; color:#777; padding:0 1em; } blockquote, q { quotes:none; } blockquote::before,  blockquote::after,  q::before,  q::after { content:none; } a:link, a:visited { color:#33e; text-decoration:none; } a:hover { color:#00f; text-shadow:1px 1px 2px #ccf; text-decoration:underline; } h1, h2, h3, h4, h5, h6 { font-weight:700; color:#000; cursor:text; position:relative; margin:1.3em 0 1em; } h1 { font-size:2.3em; } h2 { font-size:1.7em; border-bottom:1px solid #CCC; } h3 { font-size:1.5em; } h4 { font-size:1.2em; } h5 { font-size:1em; } h6 { font-size:1em; color:#777; } .shadow { box-shadow:0 5px 15px #000; } table { border-collapse:collapse; border-spacing:0; font-size:100%; font:inherit; border:0; padding:0; } tbody { border:0; margin:0; padding:0; } table tr { border:0; border-top:1px solid #CCC; background-color:#FFF; margin:0; padding:0; } table tr:nth-child(2n) { background-color:#F8F8F8; } table tr th, table tr td { border:1px solid #CCC; text-align:left; margin:0; padding:.5em 1em; } table tr th { font-weight:700; } 
-  '''
+# utilities
 
-JQ=jQuery
+# trigger => delay => callback
+# more triggers before callback => only last trigger is kept
+# callback returns non-null => retry after original delay
+class DelayTrigger
+  constructor: (cb)->
+    @cb=cb
+    @tid=null
+  trigger: (delay)->
+    if @tid? then clearTimeout @tid
+    @tid=setTimeout (=>if @cb()? then @trigger(delay)), delay
+
 
 # module inlinify {
 
@@ -27,8 +33,6 @@ JQ=jQuery
 # adapted from: http://stackoverflow.com/questions/298750/how-do-i-select-text-nodes-with-jquery
 getTextNodesIn=(node)->
   textNodes = []
-  whitespace = /^\s*$/
-
   getTextNodes=(node)->
     if node.nodeType == 3
       textNodes.push(node)
@@ -36,14 +40,13 @@ getTextNodesIn=(node)->
       for n in node.childNodes
         getTextNodes(n)
     null
-
   getTextNodes(node)
   return textNodes
 
 # get css rules from css text
 getCssRules=(css)->
-  doc=JQ('<iframe />').css('display', 'none').appendTo(JQ('body'))[0].contentDocument
-  JQ(doc).find('head').append(JQ("<style>#{css}</style>"))
+  doc=JQ('<iframe />').css('display', 'none').appendTo('body')[0].contentDocument
+  JQ(doc).find('head').append("<style>#{css}</style>")
   doc.styleSheets[0].cssRules
 
 # escape cssText to avoid single-double-quote hell
@@ -60,7 +63,7 @@ inlineCss=(el, cssRules)->
     list=jel[0]?.querySelectorAll(rule.selectorText)
     if list?
       [].slice.call(list).forEach (x)->
-        x.style.cssText="#{escapeCssText rule.style.cssText};"+escapeCssText x.style.cssText
+        x.style.cssText=(escapeCssText rule.style.cssText)+';'+(escapeCssText x.style.cssText)
   jel
 
 # convert everything within `el` into <span>
@@ -73,30 +76,30 @@ spanifyAll=(el)->
     JQ("""<span style="#{escapeCssText el.style.cssText}">#{el.innerHTML}</span>""")
 
   # preformatted text: replace with `&amp;` and friends
-  jel.find('pre').each (i, x)->
-    for text in getTextNodesIn(x)
+  jel.find('pre').each ->
+    for text in getTextNodesIn(this)
       str=text.data.toString()
         .replace(/\&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/\ /g, '&nbsp;')
         .replace(/[\n\r\v]/g, '<br/>')
-      JQ(text).replaceWith JQ("<span>#{str}</span>")
-    #x.style.whiteSpace='pre'
+      JQ(text).replaceWith("<span>#{str}</span>")
+    #this.style.whiteSpace='pre'
   jel
 
   # workaround for td over-shrinking
-  jel.find('td').each ->
-    JQ(this).children().each ->
-      this.style.whiteSpace||='nowrap'
+  jel.find('td').children().each ->
+    this.style.whiteSpace||='nowrap'
 
   # container -> span with corresponding `display: xxx`
   # NOTE: order of operation is significant!
   [
     ['pre, code', 'inline']
+    ['s, del', 'inline'] # use stylesheet instead
     ['div, p, blockquote', 'block']
     ['h1, h2, h3, h4, h5, h6', 'block']
-    ['td', 'table-cell']
+    ['td', 'table-cell'] # table family
     ['tr', 'table-row']
     ['tbody', 'table']
     ['table', 'block']
@@ -109,14 +112,13 @@ spanifyAll=(el)->
       return
     )(arg...)
     return
-  
 
   # tags using internal span for style
   ['a'].forEach (tag)->
-    jel.find(tag).each (i, x)->
-      st=x.style.cssText
-      x.style.cssText=''
-      JQ(x).wrap("""<span style="#{escapeCssText st}"/>""")
+    jel.find(tag).each ->
+      st=this.style.cssText
+      this.style.cssText=''
+      JQ(this).wrap("""<span style="#{escapeCssText st}"/>""")
 
   return
 
@@ -150,18 +152,18 @@ getGist=(id, cb)->
   gistCss=gistCssRes.responseText
 
   i1=gistJs.indexOf("\n")
-  i1=gistJs.indexOf("('", i1)+1
-  i2=gistJs.lastIndexOf(")")
+  i1=gistJs.indexOf("('", i1)+2
+  i2=gistJs.lastIndexOf("')")
 
   if i1>0 && i2>0
-    gistHtml=eval(gistJs.substring(i1, i2))
+    gistHtml=JSON.parse('\"'+gistJs.substring(i1, i2)+'\"')
   else
     err=Error("can't find gist content")
     cb err; throw err
 
   cb(null, gistCss, gistHtml)
 
-unsafeWindow.gistManager=gistManager=
+gistManager=
   saved: {}
   cssRules: null
   get: (id, cb)->
@@ -172,21 +174,20 @@ unsafeWindow.gistManager=gistManager=
       cb err; throw err
     else
       if !cssRules? then cssRules=getCssRules(gistCss)
-      el=JQ(gistHtml).wrap('<span />').parent().css('display', 'none').appendTo JQ('body')
+      el=JQ(gistHtml).wrap('<span />').parent().css('display', 'none').appendTo('body')
       inlineCss el, cssRules
       spanifyAll el
       el.css('display', '')
-      cb null, @saved[id]=el 
+      cb null, @saved[id]=el
 
 # } //module getGist
-
 
 # module rrmd {
 
 # encode & embed markdown source into generated html
 
-str_to_b64=(str)->window.btoa unescape encodeURIComponent str
-b64_to_str=(b64)->decodeURIComponent escape window.atob b64
+str_to_b64=(str)->W.btoa unescape encodeURIComponent str
+b64_to_str=(b64)->decodeURIComponent escape W.atob b64
 
 embed=(h, md)->
   h+"""<span style="visibility: hidden; display: block; height: 0; background-image: url('http://dummy/$rrmd$')">#{str_to_b64(md)}</span>"""
@@ -198,51 +199,70 @@ unembed=(h)->
   try return b64_to_str(b64)
   catch e then return ''
 
-mceReadyQ=(cb)->
-  tid=setInterval (->
-    if unsafeWindow.tinymce?.editors?[0]?
-      clearInterval(tid)
-      cb()
-  ), 1000
 
-await mceReadyQ defer()
-
-unsafeWindow.rrmd=rrmd=
+W.rrmd=rrmd=
   options:
-    pollingPeriod: 500
+    delay: 400
     embedGistQ: true
 
   init: ->
-    @editor=unsafeWindow.tinymce.editors[0]
+    @editor=W.tinymce.editors[0]
     @ui.init()
     @ui.area.val(unembed @editor.getContent())
-    @ui.area.bind 'input', (e)=>
-      if @tid? then clearTimeout @tid
-      @tid=setTimeout (=>
-        err=null; html=''
-        await @conv defer(err, html)
-        if err? then throw err
-        @editor.setContent(html)
-      ), @options.pollingPeriod
+    @dt=new DelayTrigger =>@update()
+    @ui.area.bind 'input', =>
+      @dt.trigger(@options.delay) # need to preserve input event even when busy
+      if !@busyQ
+        @ui.setStatus('...', 'Input...', 0)
+
+    @busyQ=false
+    @ui.setStatus('ok', 'Ready.', 0)
 
   ui:
     html:
       """
-      <div id="rrmd_wrapper" style="margin: 0em 0em 1em 0em">
+      <div id="rrmd_wrapper" style="margin: 0 0 1em 0">
         <textarea id="rrmd_area" style="font-family: Consolas, 'Inconsolata', 'Courier New', 'Monospace';" placeholder="Type markdown _here_!"></textarea>
+        <div id="rrmd_status" style="margin: 0.5em 0 0 0;">
+          <span id="rrmd_status_icon"></span>
+          <span id="rrmd_status_text"></span>
+          <span id="rrmd_status_progress" style="float: right;"></span>
+          <span style="clear: both;"></span>
+          <div style="height: 2px; width: 100%;"><div id="rrmd_status_pb" style="display: none; background-color:#0c0; width: 0%; height: 100%"></div></div>
+        </div>
       </div>
       """
-    init:->
+    init: ->
       JQ('#editor_tbl').before(@html)
       @area=JQ('#rrmd_area')
+      @statusText=JQ('#rrmd_status_text')
+      @statusProgress=JQ('#rrmd_status_progress')
+      @statusPb=JQ('#rrmd_status_pb')
 
       # fix "offset blog title input"
       JQ('#title_bg')[0]?.style.cssText='position: inherit !important; width: 100%'
       JQ('#title')[0]?.style.cssText='width: 98%'
       JQ('#editor_ifr')[0]?.contentDocument.body.style.paddingTop="0px"
+    setStatus: (type, text, progress)->
+      console.log(progress + ':' + text)
+      # TODO: handle type icon
+      if text? then @statusText.html(text)
+      if 0<=progress<=1
+        p=Math.round(progress*100).toString()+'%'
+        @statusProgress.html(p)
 
-  style: getCssRules(rrmdStyle)
-  engine: (md)->
+        switch progress
+          when 0
+            @statusPb.stop(true).css('width', 0).hide()
+          when 1
+            await @statusPb.stop(true).css('opacity', '1').show().animate({width: p}, 500, 'linear', defer())
+            await @statusPb.fadeOut(1500, 'swing', defer())
+            @statusPb.css('width', 0)
+          else
+            @statusPb.show().animate({width: p}, 750, 'swing')
+
+  style: getCssRules(RRMD_STYLE)
+  markdown: (md)->
     el=JQ(marked(md)).wrapAll('<span />').parent()
     inlineCss el, @style
     spanifyAll el
@@ -250,21 +270,56 @@ unsafeWindow.rrmd=rrmd=
 
   conv: (cb)->
     md=@ui.area.val()
-    el=@engine(md)
+    el=@markdown(md)
+    @ui.setStatus(null, null, 0.01)
     if @options.embedGistQ
-      re=/^(?:(?:http|https)\:\/\/)?gist.github.com\/(\w+)/
-      for a in JQ(el).find('a').toArray()
-        if (match=a.href.match(re))? && a.href==a.innerHTML
-          id=match[1]
-          err=null; gist=''
-          await gistManager.get id, defer(err, gist)
-          if err?
-            cb err; throw err
-          JQ(a).replaceWith(gist)
+      re=/^(?:(?:http|https)\:\/\/)?gist\.github\.com\/(\w+)/
+      list=JQ(el).find('a').toArray().filter (a)->
+        re.test(a.href) && a.href==a.innerHTML
+      n=list.length
+      for a, i in list
+        id=a.href.match(re)[1]
+        err=null; gist=''
+        await gistManager.get id, defer(err, gist)
+        if err?
+          cb err; throw err
+        JQ(a).replaceWith(gist)
+        @ui.setStatus(null, null, 0.01+0.99*(i+1)/n)
     hmd=embed(el.wrapAll('<span />').parent().html()||'', md)
     cb null, hmd
 
+  update: ->
+    if @busyQ then return false
+    @busyQ=true
+    @ui.setStatus('wip', 'Converting...', 0)
+
+    err=null; html=''
+    await @conv defer(err, html)
+    if err?
+      @ui.setStatus('err', "Error! #{err.toString()}", null)
+      @busyQ=false
+      throw err
+    @editor.setContent(html)
+
+    @ui.setStatus('ok', 'Conversion complete.', 1)
+    @busyQ=false
+    null
+
+
+# init after all modules load
+
+checkPageReady=(cb)->
+  tid=setInterval (->
+    if W.tinymce?.editors?[0]?
+      # && W.MathJax?.isReady
+      clearInterval(tid)
+      cb()
+  ), 1000
+
+await checkPageReady defer()
+# await W.MathJax.Hub.Queue [defer()]
+
 rrmd.init()
+rrmd.JQ=JQ # for debugger access
 
 # } //module rrmd
-
