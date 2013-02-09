@@ -4,7 +4,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.16
+// @version       0.4.18
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/*Entry*
@@ -204,6 +204,7 @@ W.rrmd=rrmd=
   options:
     delay: 400
     embedGistQ: true
+    emoticonQ: true
 
   init: ->
     @editor=W.tinymce.editors[0]
@@ -272,8 +273,9 @@ W.rrmd=rrmd=
     md=@ui.area.val()
     el=@markdown(md)
     @ui.setStatus(null, null, 0.01)
+
     if @options.embedGistQ
-      re=/^(?:(?:http|https)\:\/\/)?gist\.github\.com\/(\w+)/
+      re=/^(?:(?:http|https)\:\/\/)?gist\.github\.com\/([\w\/]+)/
       list=JQ(el).find('a').toArray().filter (a)->
         re.test(a.href) && a.href==a.innerHTML
       n=list.length
@@ -285,6 +287,13 @@ W.rrmd=rrmd=
           cb err; throw err
         JQ(a).replaceWith(gist)
         @ui.setStatus(null, null, 0.01+0.99*(i+1)/n)
+
+    if @options.emoticonQ
+      JQ(el).find('img[src=""]').each ->
+        if (em=EMOTICON[@alt])?
+          @src=EMOTICON_ROOT+em.src
+          @alt=em.alt
+
     hmd=embed(el.wrapAll('<span />').parent().html()||'', md)
     cb null, hmd
 

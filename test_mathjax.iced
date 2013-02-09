@@ -69,6 +69,7 @@ spanifyAll=(el)->
     ['pre, code', 'inline']
     ['s, del', 'inline'] # use stylesheet instead
     ['div, p, blockquote', 'block']
+    ['nobr', 'inline']
     ['h1, h2, h3, h4, h5, h6', 'block']
     ['td', 'table-cell'] # table family
     ['tr', 'table-row']
