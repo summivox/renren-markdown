@@ -1,11 +1,25 @@
 #Renren-Markdown
 _by smilekzs_
 
+**前言：Markdown绝不是geek的专利，其实跟在论坛发帖用的格式差不多。** 可以看看下面的例子。
+
+**推荐大家在userscript.org下载，这样greasemonkey/tampermonkey可以自动更新～**
+
+<br/>
+
+最新版本：v0.4.18
+
+> 修正：gist.github.com最新链接格式（带用户名） e.g. `https://gist.github.com/smilekzs/4344334` 
+> 支持插入人人表情 `![表情对应的文字]()` e.g. `![(mb)]()`  
+
+<br/>
+
 如果你：
 
 * 不想受人人日志中格式的束缚
 * 希望像在自己的博客空间上一样，自由地写作
-* 需要快速、方便地在日志中嵌入代码而不被吞格式
+* 需要快速、方便地在日志中嵌入代码(直接插入，或插入[gist](http://gist.github.com/))而不被吞格式
+* <del><sub>想装B</sub></del> ![(谄笑)]()
 * ...
 
 你可以试试我写的这个插件～
@@ -15,7 +29,7 @@ _by smilekzs_
 * 使用[markdown][]创建格式优美的人人日志
 * 实时预览效果，所见即所得(almost)
 * 编辑日志的时候，可以**直接**编辑原来写的markdown
-* 内置一些对人人日志html过滤的修正，可以解决部分排版问题
+* 内置模板，可以绕过人人html过滤，避免排版错乱
 
 [markdown]: http://daringfireball.net/projects/markdown/
 
@@ -38,21 +52,18 @@ renren-markdown是一个[userscript](http://userscripts.org), 主要支持如下
 
 安装完成后，即可下载安装本userscript：
 
-* [在userscripts.org上下载][us]（推荐）
-* [在github上下载][gist-raw]
-* 访问[gist][], 下载`renren-markdown.user.js`
+* http://userscripts.org/scripts/show/154555（推荐）
+* [在gist上下载][gist-raw]
+* 访问[gist][](id: 4344334), 下载`renren-markdown.user.js`
 
 然后就可以在正常人人发表/编辑日志的界面下用markdown写日志啦～
 
 **注意: 用renren-markdown写日志的时候，原来日志编辑器中已存在的内容将被覆盖！**
 
-[us]: http://userscripts.org/scripts/show/154555
 [gist]: https://gist.github.com/4344334
-[gist-raw]: https://gist.github.com/raw/4344334/782761d21920818b067cb9ec252e8245aaec1df6/renren-markdown.user.js
+[gist-raw]: https://gist.github.com/raw/4344334/fa291916bb9f5b7c6a32d2071bd451b0744b3f7a/renren-markdown.user.js
 
 ##一些例子
-
----
 
 写：
 
@@ -118,7 +129,18 @@ title
 
 [![](http://s.xnimg.cn/imgpro/v6/logo.png?f=trunk)](http://www.renren.com/)
 
+---
+
+写：
+
+    https://gist.github.com/2775950
+
+得到：
+
+https://gist.github.com/2775950
 
 ---
 
-更多语法见[这里](http://daringfireball.net/projects/markdown/syntax)
+###更多语法见[这里](http://daringfireball.net/projects/markdown/syntax)
+
+
