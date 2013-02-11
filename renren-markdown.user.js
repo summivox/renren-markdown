@@ -50,7 +50,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.18
+// @version       0.4.19
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/*Entry*
@@ -263,7 +263,7 @@ var W=unsafeWindow;
         i1 = gistJs.indexOf("('", i1) + 2;
         i2 = gistJs.lastIndexOf("')");
         if (i1 > 0 && i2 > 0) {
-          gistHtml = JSON.parse('\"' + gistJs.substring(i1, i2) + '\"');
+          gistHtml = JSON.parse('\"' + gistJs.substring(i1, i2).replace(/\\'/g, '\'') + '\"');
         } else {
           err = Error("can't find gist content");
           cb(err);
