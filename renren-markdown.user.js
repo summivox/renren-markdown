@@ -50,9 +50,10 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.19
+// @version       0.4.20
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
+// @include       *blog.renren.com/blog/*edit*
 // @include       *blog.renren.com/*Entry*
 // ==/UserScript==
 
@@ -216,7 +217,7 @@ var W=unsafeWindow;
               return gistJsRes = arguments[0];
             };
           })(),
-          lineno: 134
+          lineno: 135
         }),
         onerror: function(err) {
           cb(err);
@@ -249,7 +250,7 @@ var W=unsafeWindow;
                 return gistCssRes = arguments[0];
               };
             })(),
-            lineno: 148
+            lineno: 149
           }),
           onerror: function(err) {
             cb(err);
@@ -300,7 +301,7 @@ var W=unsafeWindow;
               return gistHtml = arguments[2];
             };
           })(),
-          lineno: 171
+          lineno: 172
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -407,7 +408,7 @@ var W=unsafeWindow;
                   _this.statusPb.stop(true).css('opacity', '1').show().animate({
                     width: p
                   }, 500, 'linear', __iced_deferrals.defer({
-                    lineno: 258
+                    lineno: 259
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -418,7 +419,7 @@ var W=unsafeWindow;
                       funcname: "setStatus"
                     });
                     _this.statusPb.fadeOut(1500, 'swing', __iced_deferrals.defer({
-                      lineno: 259
+                      lineno: 260
                     }));
                     __iced_deferrals._fulfill();
                   })(function() {
@@ -501,7 +502,7 @@ var W=unsafeWindow;
                         return gist = arguments[1];
                       };
                     })(),
-                    lineno: 284
+                    lineno: 285
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -556,7 +557,7 @@ var W=unsafeWindow;
               return html = arguments[1];
             };
           })(),
-          lineno: 305
+          lineno: 306
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -589,7 +590,7 @@ var W=unsafeWindow;
       filename: "renren-markdown.user.iced"
     });
     checkPageReady(__iced_deferrals.defer({
-      lineno: 327
+      lineno: 328
     }));
     __iced_deferrals._fulfill();
   })(function() {

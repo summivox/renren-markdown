@@ -4,9 +4,10 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.19
+// @version       0.4.20
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
+// @include       *blog.renren.com/blog/*edit*
 // @include       *blog.renren.com/*Entry*
 // ==/UserScript==
 
