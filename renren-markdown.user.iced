@@ -4,7 +4,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.20
+// @version       0.4.25
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/blog/*edit*
@@ -30,7 +30,6 @@ class DelayTrigger
 
 # module inlinify {
 
-# get all text nodes without jQuery
 # adapted from: http://stackoverflow.com/questions/298750/how-do-i-select-text-nodes-with-jquery
 getTextNodesIn=(node)->
   textNodes = []
@@ -54,18 +53,45 @@ getCssRules=(css)->
 escapeCssText=(cssText)->
   cssText.replace /"/g, "'"
 
-# inline css rules into element `el`
-inlineCss=(el, cssRules)->
-  jel=JQ(el)
-  for rule in cssRules
-    # FIXME: this works around a strange jQuery bug:
-    #   jel.find(rule.selectorText).each ...
-    # above code won't work
-    list=jel[0]?.querySelectorAll(rule.selectorText)
-    if list?
-      [].slice.call(list).forEach (x)->
-        x.style.cssText=(escapeCssText rule.style.cssText)+';'+(escapeCssText x.style.cssText)
-  jel
+# inline css with specificity awareness
+getSpec=(x)->
+  SPECIFICITY.calculate(x)[0].specificity.split(',').map(Number)
+
+cmp=(a, b)->
+  switch
+    when a<b then -1
+    when a>b then +1
+    else 0
+
+cmpSpec=(a, b)->
+  for i in [0...4]
+    if (c=cmp(a[i], b[i])) then return c
+  return 0
+
+MARKER='inl'
+arrayize=(a)->[].slice.call(a)
+inlineCss=(root, rules)->
+  arrayize(rules).forEach (r)->
+    sel=r.selectorText
+    spec=getSpec(sel)
+    if (selected=root.querySelectorAll(sel))?
+      arrayize(selected).forEach (el)->
+        if !el.stylePlus?
+          el.stylePlus={}
+          el.dataset[MARKER]=''
+        for key in (style=r.style)
+          value=style[key] # r.style is double array-dict
+          unless (orig=el.stylePlus[key])? && cmpSpec(orig.spec, spec)>0
+            el.stylePlus[key]={spec, value}
+        null
+  if (selected=root.querySelectorAll("[data-#{MARKER}]"))?
+    arrayize(selected).forEach (el)->
+      for k, p of el.stylePlus
+        el.style[k]||=p.value
+      delete el.stylePlus
+      delete el.dataset[MARKER]
+      null
+  root
 
 # convert everything within `el` into <span>
 spanifyAll=(el)->
@@ -93,6 +119,9 @@ spanifyAll=(el)->
   jel.find('td').children().each ->
     this.style.whiteSpace||='nowrap'
 
+  # flatten table (strips t{head, body, foot})
+  jel.find('tbody, thead, tfoot').children().unwrap()
+
   # container -> span with corresponding `display: xxx`
   # NOTE: order of operation is significant!
   [
@@ -100,10 +129,9 @@ spanifyAll=(el)->
     ['s, del', 'inline'] # use stylesheet instead
     ['div, p, blockquote', 'block']
     ['h1, h2, h3, h4, h5, h6', 'block']
-    ['td', 'table-cell'] # table family
+    ['td, th', 'table-cell'] # table family
     ['tr', 'table-row']
-    ['tbody', 'table']
-    ['table', 'block']
+    ['table', 'table']
   ].forEach (arg)->
     ((tag, disp)->
       while x=jel.find(tag)[0]
@@ -121,7 +149,8 @@ spanifyAll=(el)->
       this.style.cssText=''
       JQ(this).wrap("""<span style="#{escapeCssText st}"/>""")
 
-  return
+  jel
+
 
 # } //module inlinify
 
@@ -175,9 +204,8 @@ gistManager=
       cb err; throw err
     else
       if !cssRules? then cssRules=getCssRules(gistCss)
-      el=JQ(gistHtml).wrap('<span />').parent().css('display', 'none').appendTo('body')
-      inlineCss el, cssRules
-      spanifyAll el
+      el=JQ(gistHtml).wrap('<span />').parent().css('display', 'none').appendTo('body')[0]
+      el=spanifyAll inlineCss el, cssRules
       el.css('display', '')
       cb null, @saved[id]=el
 
@@ -202,12 +230,16 @@ unembed=(h)->
 
 
 W.rrmd=rrmd=
+  lib:
+    {JQ, marked, SPECIFICITY}
+
   options:
     delay: 400
     embedGistQ: true
     emoticonQ: true
 
   init: ->
+    @style=getCssRules(RRMD_STYLE)
     @editor=W.tinymce.editors[0]
     @ui.init()
     @ui.area.val(unembed @editor.getContent())
@@ -235,6 +267,7 @@ W.rrmd=rrmd=
       </div>
       """
     init: ->
+
       JQ('#editor_tbl').before(@html)
       @area=JQ('#rrmd_area')
       @statusText=JQ('#rrmd_status_text')
@@ -245,6 +278,7 @@ W.rrmd=rrmd=
       JQ('#title_bg')[0]?.style.cssText='position: inherit !important; width: 100%'
       JQ('#title')[0]?.style.cssText='width: 98%'
       JQ('#editor_ifr')[0]?.contentDocument.body.style.paddingTop="0px"
+
     setStatus: (type, text, progress)->
       console.log(progress + ':' + text)
       # TODO: handle type icon
@@ -263,12 +297,9 @@ W.rrmd=rrmd=
           else
             @statusPb.show().animate({width: p}, 750, 'swing')
 
-  style: getCssRules(RRMD_STYLE)
   markdown: (md)->
-    el=JQ(marked(md)).wrapAll('<span />').parent()
-    inlineCss el, @style
-    spanifyAll el
-    el
+    el=JQ(marked(md)).wrapAll('<span />').parent()[0]
+    spanifyAll inlineCss el, @style
 
   conv: (cb)->
     md=@ui.area.val()
@@ -277,7 +308,7 @@ W.rrmd=rrmd=
 
     if @options.embedGistQ
       re=/^(?:(?:http|https)\:\/\/)?gist\.github\.com\/([\w\/]+)/
-      list=JQ(el).find('a').toArray().filter (a)->
+      list=el.find('a').toArray().filter (a)->
         re.test(a.href) && a.href==a.innerHTML
       n=list.length
       for a, i in list
@@ -290,7 +321,7 @@ W.rrmd=rrmd=
         @ui.setStatus(null, null, 0.01+0.99*(i+1)/n)
 
     if @options.emoticonQ
-      JQ(el).find('img[src=""]').each ->
+      el.find('img[src=""]').each ->
         if (em=EMOTICON[@alt])?
           @src=EMOTICON_ROOT+em.src
           @alt=em.alt
