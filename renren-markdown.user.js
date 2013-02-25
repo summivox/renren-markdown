@@ -236,7 +236,6 @@ var W=unsafeWindow;
       }
       return _results;
     });
-    jel;
     jel.find('td').children().each(function() {
       var _base;
       return (_base = this.style).whiteSpace || (_base.whiteSpace = 'nowrap');
@@ -284,7 +283,7 @@ var W=unsafeWindow;
               return gistJsRes = arguments[0];
             };
           })(),
-          lineno: 164
+          lineno: 163
         }),
         onerror: function(err) {
           cb(err);
@@ -317,7 +316,7 @@ var W=unsafeWindow;
                 return gistCssRes = arguments[0];
               };
             })(),
-            lineno: 178
+            lineno: 177
           }),
           onerror: function(err) {
             cb(err);
@@ -368,7 +367,7 @@ var W=unsafeWindow;
               return gistHtml = arguments[2];
             };
           })(),
-          lineno: 201
+          lineno: 200
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -480,7 +479,7 @@ var W=unsafeWindow;
                   _this.statusPb.stop(true).css('opacity', '1').show().animate({
                     width: p
                   }, 500, 'linear', __iced_deferrals.defer({
-                    lineno: 293
+                    lineno: 292
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -491,7 +490,7 @@ var W=unsafeWindow;
                       funcname: "setStatus"
                     });
                     _this.statusPb.fadeOut(1500, 'swing', __iced_deferrals.defer({
-                      lineno: 294
+                      lineno: 293
                     }));
                     __iced_deferrals._fulfill();
                   })(function() {
@@ -571,7 +570,7 @@ var W=unsafeWindow;
                         return gist = arguments[1];
                       };
                     })(),
-                    lineno: 316
+                    lineno: 315
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -626,7 +625,7 @@ var W=unsafeWindow;
               return html = arguments[1];
             };
           })(),
-          lineno: 337
+          lineno: 336
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -659,7 +658,7 @@ var W=unsafeWindow;
       filename: "renren-markdown.user.iced"
     });
     checkPageReady(__iced_deferrals.defer({
-      lineno: 359
+      lineno: 358
     }));
     __iced_deferrals._fulfill();
   })(function() {

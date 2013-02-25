@@ -113,7 +113,6 @@ spanifyAll=(el)->
         .replace(/[\n\r\v]/g, '<br/>')
       JQ(text).replaceWith("<span>#{str}</span>")
     #this.style.whiteSpace='pre'
-  jel
 
   # workaround for td over-shrinking
   jel.find('td').children().each ->
