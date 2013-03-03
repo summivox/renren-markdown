@@ -4,7 +4,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.26
+// @version       0.4.27
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/blog/*edit*
@@ -300,7 +300,7 @@ W.rrmd=rrmd=
 
   markdown: (md)->
     el=JQ marked md
-    if !el then return JQ('<span />')
+    if !el.length then return JQ('<span />')
     el=el.wrapAll('<span />').parent()[0]
     spanifyAll inlineCss el, @style
 

@@ -7,7 +7,7 @@ _by smilekzs_
 
 <br/>
 
-最新版本：v0.4.26
+最新版本：v0.4.27
 
 > 修正：gist.github.com最新链接格式（带用户名） e.g. `https://gist.github.com/smilekzs/4344334` 
 > 支持插入人人表情 `![表情对应的文字]()` e.g. `![(mb)]()`  

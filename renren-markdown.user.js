@@ -50,7 +50,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.26
+// @version       0.4.27
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/blog/*edit*
@@ -513,7 +513,7 @@ var W=unsafeWindow;
     markdown: function(md) {
       var el;
       el = JQ(marked(md));
-      if (!el) return JQ('<span />');
+      if (!el.length) return JQ('<span />');
       el = el.wrapAll('<span />').parent()[0];
       return spanifyAll(inlineCss(el, this.style));
     },
