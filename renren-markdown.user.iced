@@ -4,7 +4,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.25
+// @version       0.4.26
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/blog/*edit*
@@ -68,7 +68,6 @@ cmpSpec=(a, b)->
     if (c=cmp(a[i], b[i])) then return c
   return 0
 
-MARKER='inl'
 arrayize=(a)->[].slice.call(a)
 inlineCss=(root, rules)->
   arrayize(rules).forEach (r)->
@@ -78,18 +77,21 @@ inlineCss=(root, rules)->
       arrayize(selected).forEach (el)->
         if !el.stylePlus?
           el.stylePlus={}
-          el.dataset[MARKER]=''
         for key in (style=r.style)
-          value=style[key] # r.style is double array-dict
+          value=style.getPropertyValue(key) 
           unless (orig=el.stylePlus[key])? && cmpSpec(orig.spec, spec)>0
             el.stylePlus[key]={spec, value}
         null
-  if (selected=root.querySelectorAll("[data-#{MARKER}]"))?
-    arrayize(selected).forEach (el)->
+  arrayize(root.querySelectorAll('*')).forEach (el)->
+    if el.stylePlus?
+      for key in el.style
+        el.stylePlus[key]=el.style.getPropertyValue(key)
       for k, p of el.stylePlus
-        el.style[k]||=p.value
+        # dirty workaround: firefox `padding-right-value` problem
+        if k.match(/-value$/) && k!='drop-initial-value'
+          k=k[0...(k.lastIndexOf('-'))]
+        el.style.setProperty(k, p.value, 'important')
       delete el.stylePlus
-      delete el.dataset[MARKER]
       null
   root
 
@@ -297,7 +299,9 @@ W.rrmd=rrmd=
             @statusPb.show().animate({width: p}, 750, 'swing')
 
   markdown: (md)->
-    el=JQ(marked(md)).wrapAll('<span />').parent()[0]
+    el=JQ marked md
+    if !el then return JQ('<span />')
+    el=el.wrapAll('<span />').parent()[0]
     spanifyAll inlineCss el, @style
 
   conv: (cb)->
