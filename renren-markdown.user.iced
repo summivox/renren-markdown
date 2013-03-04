@@ -4,7 +4,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.27
+// @version       0.4.28
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/blog/*edit*
@@ -100,9 +100,12 @@ spanifyAll=(el)->
   jel=JQ(el)
 
   # clone `el` with raw span element
+  # also prevent elements with no text from being stripped
   spanify=(el)->
     if !el? then return JQ('<span />')
-    JQ("""<span style="#{escapeCssText el.style.cssText}">#{el.innerHTML}</span>""")
+    style=escapeCssText el.style.cssText
+    cont=el.innerHTML.trim() || '<span style="display: none;">&nbsp;</span>'
+    JQ("""<span style="#{style}">#{cont}</span>""")
 
   # preformatted text: replace with `&amp;` and friends
   jel.find('pre').each ->
@@ -127,9 +130,10 @@ spanifyAll=(el)->
   # NOTE: order of operation is significant!
   [
     ['pre, code', 'inline']
-    ['s, del', 'inline'] # use stylesheet instead
-    ['div, p, blockquote', 'block']
+    ['s, del', 'inline']
+    ['div, p, blockquote, q', 'block']
     ['h1, h2, h3, h4, h5, h6', 'block']
+    ['hr', 'block']
     ['td, th', 'table-cell'] # table family
     ['tr', 'table-row']
     ['table', 'table']

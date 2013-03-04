@@ -149,3 +149,16 @@ table tr th {
     font-weight:700;
 }
 
+s, del {
+    text-decoration:line-through;
+    color:#ccc;
+}
+
+hr {
+    background: transparent url(https://gist.github.com/assets/primer/markdown/dirty-shade-b257e362bd496ca183d2a6743c25bc72.png) repeat-x 0 0;
+    border: 0 none;
+    color: #ccc;
+    height: 4px;
+    padding: 0;
+    margin: 1em 0 0 0;
+}
