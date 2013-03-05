@@ -3,7 +3,7 @@ pre, code {
     font-family:Consolas, Inconsolata, Courier, monospace;
 }
 
-code {
+code{
     white-space:nowrap;
     border:1px solid #EAEAEA;
     background-color:#F8F8F8;
@@ -19,12 +19,16 @@ pre {
     overflow:auto;
 }
 
-pre code {
-    white-space:pre;
+pre code, div.highlight {
     border-radius:3px;
     border:1px solid #CCC;
+    background-color:#F8F8F8;
     padding:.5em .7em;
     display: block !important;
+}
+
+pre code {
+    white-space:pre;
 }
 
 p, blockquote, ul, ol, dl, li, table, pre {

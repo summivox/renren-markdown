@@ -4,7 +4,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.28
+// @version       0.4.31
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/blog/*edit*
@@ -131,7 +131,7 @@ spanifyAll=(el)->
   [
     ['pre, code', 'inline']
     ['s, del', 'inline']
-    ['div, p, blockquote, q', 'block']
+    ['div, p, blockquote, q, article', 'block']
     ['h1, h2, h3, h4, h5, h6', 'block']
     ['hr', 'block']
     ['td, th', 'table-cell'] # table family
@@ -304,15 +304,15 @@ W.rrmd=rrmd=
       if err?
         cb err; throw err
       else
-        if !@cssRules? then @cssRules=getCssRules(gistCss)
+        if !@cssRules? then gistCssRules=@cssRules=getCssRules(gistCss)
         jel=JQ(gistHtml)
-        # if markdown, embed markdown style instead
-        if (jmd=jel.find('article.markdown-body')).length
-          jel=jmd.children().unwrap()
-          r=rrmd.cssRules
-        else
-          r=@cssRules
-        el=spanifyAll inlineCss jel.wrapAll('<span />').parent()[0], r
+        # special: promote markdown content
+        jel.find('article.markdown-body').each ->
+          inlineCss this, rrmd.cssRules
+          inlineCss this, gistCssRules # necessary: for code highlighting
+          JQ(this).parentsUntil('div.gist').last().replaceWith(this)
+          null
+        el=spanifyAll inlineCss jel.wrapAll('<span />').parent()[0], @cssRules
         cb null, @saved[id]=el
 
   conv: (cb)->
