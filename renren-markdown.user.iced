@@ -198,21 +198,6 @@ getGist=(id, cb)->
 
   cb(null, gistCss, gistHtml)
 
-gistManager=
-  saved: {}
-  cssRules: null
-  get: (id, cb)->
-    if @saved[id]? then return cb null, @saved[id]
-    err=null; gistCss=''; gistHtml=''
-    await getGist id, defer(err, gistCss, gistHtml)
-    if err?
-      cb err; throw err
-    else
-      if !cssRules? then cssRules=getCssRules(gistCss)
-      el=JQ(gistHtml).wrap('<span />').parent().css('display', 'none').appendTo('body')[0]
-      el=spanifyAll inlineCss el, cssRules
-      el.css('display', '')
-      cb null, @saved[id]=el
 
 # } //module getGist
 
@@ -242,9 +227,10 @@ W.rrmd=rrmd=
     delay: 400
     embedGistQ: true
     emoticonQ: true
+    removeAnchorQ: true
 
   init: ->
-    @style=getCssRules(RRMD_STYLE)
+    @cssRules=getCssRules(RRMD_STYLE)
     @editor=W.tinymce.editors[0]
     @ui.init()
     @ui.area.val(unembed @editor.getContent())
@@ -306,7 +292,28 @@ W.rrmd=rrmd=
     el=JQ marked md
     if !el.length then return JQ('<span />')
     el=el.wrapAll('<span />').parent()[0]
-    spanifyAll inlineCss el, @style
+    spanifyAll inlineCss el, @cssRules
+
+  gistManager:
+    saved: {}
+    cssRules: null
+    get: (id, cb)->
+      if @saved[id]? then return cb null, @saved[id]
+      err=null; gistCss=''; gistHtml=''
+      await getGist id, defer(err, gistCss, gistHtml)
+      if err?
+        cb err; throw err
+      else
+        if !@cssRules? then @cssRules=getCssRules(gistCss)
+        jel=JQ(gistHtml)
+        # if markdown, embed markdown style instead
+        if (jmd=jel.find('article.markdown-body')).length
+          jel=jmd.children().unwrap()
+          r=rrmd.cssRules
+        else
+          r=@cssRules
+        el=spanifyAll inlineCss jel.wrapAll('<span />').parent()[0], r
+        cb null, @saved[id]=el
 
   conv: (cb)->
     md=@ui.area.val()
@@ -321,7 +328,7 @@ W.rrmd=rrmd=
       for a, i in list
         id=a.href.match(re)[1]
         err=null; gist=''
-        await gistManager.get id, defer(err, gist)
+        await @gistManager.get id, defer(err, gist)
         if err?
           cb err; throw err
         JQ(a).replaceWith(gist)
@@ -332,6 +339,9 @@ W.rrmd=rrmd=
         if (em=EMOTICON[@alt])?
           @src=EMOTICON_ROOT+em.src
           @alt=em.alt
+
+    if @options.removeAnchorQ
+      el.find('a[name]').remove()
 
     hmd=embed(el.wrapAll('<span />').parent().html()||'', md)
     cb null, hmd
