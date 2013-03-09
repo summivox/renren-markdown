@@ -50,7 +50,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.31
+// @version       0.4.32
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/blog/*edit*
@@ -509,9 +509,8 @@ var W=unsafeWindow;
             cb(err);
             throw err;
           } else {
-            if (_this.cssRules == null) {
-              gistCssRules = _this.cssRules = getCssRules(gistCss);
-            }
+            if (_this.cssRules == null) _this.cssRules = getCssRules(gistCss);
+            gistCssRules = _this.cssRules;
             jel = JQ(gistHtml);
             jel.find('article.markdown-body').each(function() {
               inlineCss(this, rrmd.cssRules);
@@ -581,7 +580,7 @@ var W=unsafeWindow;
                         return gist = arguments[1];
                       };
                     })(),
-                    lineno: 330
+                    lineno: 331
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -637,7 +636,7 @@ var W=unsafeWindow;
               return html = arguments[1];
             };
           })(),
-          lineno: 354
+          lineno: 355
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -670,7 +669,7 @@ var W=unsafeWindow;
       filename: "renren-markdown.user.iced"
     });
     checkPageReady(__iced_deferrals.defer({
-      lineno: 376
+      lineno: 377
     }));
     __iced_deferrals._fulfill();
   })(function() {

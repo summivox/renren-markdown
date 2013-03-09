@@ -4,7 +4,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.31
+// @version       0.4.32
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/blog/*edit*
@@ -304,7 +304,8 @@ W.rrmd=rrmd=
       if err?
         cb err; throw err
       else
-        if !@cssRules? then gistCssRules=@cssRules=getCssRules(gistCss)
+        if !@cssRules? then @cssRules=getCssRules(gistCss)
+        gistCssRules=@cssRules
         jel=JQ(gistHtml)
         # special: promote markdown content
         jel.find('article.markdown-body').each ->
