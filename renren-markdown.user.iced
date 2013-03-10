@@ -4,7 +4,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.33
+// @version       0.4.34
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/blog/*edit*
@@ -91,7 +91,7 @@ inlineCss=(root, rules)->
         # dirty workaround: firefox `padding-right-value` problem
         if k.match(/-value$/) && k!='drop-initial-value'
           k=k[0...(k.lastIndexOf('-'))]
-        el.style.setProperty(k, p.value, 'important')
+        el.style.setProperty(k, p.value, '')
       delete el.stylePlus
       null
   root
@@ -100,13 +100,13 @@ inlineCss=(root, rules)->
 spanifyAll=(el)->
   jel=JQ(el)
 
-  # clone `el` with raw span element
+  # clone `el` into raw span element
   # also prevent elements with no text from being stripped
-  spanify=(el)->
+  spanify=(el, cssText='')->
     if !el? then return JQ('<span />')
-    style=escapeCssText el.style.cssText
+    s=escapeCssText el.style.cssText
     cont=el.innerHTML.trim() || '<span style="display: none;">&nbsp;</span>'
-    JQ("""<span style="#{style}">#{cont}</span>""")
+    JQ("""<span style="#{s};#{cssText}">#{cont}</span>""")
 
   # preformatted text: replace with `&amp;` and friends
   jel.find('pre').each ->
@@ -115,6 +115,7 @@ spanifyAll=(el)->
         .replace(/\&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
+        .replace(/\t/g, '        ') # FIXME: tab stop hardcoded to 8
         .replace(/\ /g, '&nbsp;')
         .replace(/[\n\r\v]/g, '<br/>')
       JQ(text).replaceWith("<span>#{str}</span>")
@@ -139,8 +140,8 @@ spanifyAll=(el)->
     ['tr', 'table-row']
     ['table', 'table']
   ].forEach (arg)->
-    ((tag, disp)->
-      while x=jel.find(tag)[0]
+    ((sel, disp)->
+      while x=jel.find(sel)[0]
         s=spanify(x)
         s[0].style.display||=disp
         JQ(x).replaceWith(s)
@@ -162,6 +163,9 @@ spanifyAll=(el)->
 
 
 # module getGist {
+
+safeParse=(s)->
+  JSON.parse '\"'+s.replace(/\\'/g, '\'').replace(/\t/g, '\\t')+'\"'
 
 getGist=(id, cb)->
   gistJsRes=null
@@ -192,7 +196,7 @@ getGist=(id, cb)->
   i2=gistJs.lastIndexOf("')")
 
   if i1>0 && i2>0
-    gistHtml=JSON.parse('\"'+gistJs.substring(i1, i2).replace(/\\'/g, '\'')+'\"')
+    gistHtml=safeParse(gistJs.substring(i1, i2))
   else
     err=Error("can't find gist content")
     cb err; throw err
@@ -218,7 +222,6 @@ unembed=(h)->
   if !b64? then b64=''
   try return b64_to_str(b64)
   catch e then return ''
-
 
 W.rrmd=rrmd=
   lib:

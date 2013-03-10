@@ -1,6 +1,8 @@
-pre, code {
-    font-size: 1em;
-    font-family:Consolas, Inconsolata, Courier, monospace;
+pre {
+    font-size:1em;
+    line-height:1.2em;
+    overflow:auto;
+    white-space:pre;
 }
 
 code{
@@ -13,10 +15,9 @@ code{
     padding:0 .3em;
 }
 
-pre {
-    font-size:1em;
-    line-height:1.2em;
-    overflow:auto;
+pre, code {
+    font-size: 1em;
+    font-family:Consolas, Inconsolata, Courier, monospace;
 }
 
 pre code, div.highlight {
@@ -25,10 +26,6 @@ pre code, div.highlight {
     background-color:#F8F8F8;
     padding:.5em .7em;
     display: block !important;
-}
-
-pre code {
-    white-space:pre;
 }
 
 p, blockquote, ul, ol, dl, li, table, pre {
