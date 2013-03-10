@@ -1,5 +1,8 @@
 # Renren-Markdown
 
+**ATTENTION: This document is stale. Project has been frozen since v0.4.32 -- no more new features before next major revision.   
+Latest version of the script is always [here](http://userscripts.org/scripts/show/154555) **
+
 Provide markdown syntax support when writing articles at `renren.com`.
 * Format your article with the world-popular markdown syntax.
 * Allow editing.
