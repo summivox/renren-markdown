@@ -50,7 +50,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.32
+// @version       0.4.33
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/blog/*edit*
@@ -114,6 +114,10 @@ var W=unsafeWindow;
 
   })();
 
+  arrayize = function(a) {
+    return [].slice.call(a);
+  };
+
   getTextNodesIn = function(node) {
     var getTextNodes, textNodes;
     textNodes = [];
@@ -138,7 +142,7 @@ var W=unsafeWindow;
     var doc;
     doc = JQ('<iframe />').css('display', 'none').appendTo('body')[0].contentDocument;
     JQ(doc).find('head').append("<style>" + css + "</style>");
-    return doc.styleSheets[0].cssRules;
+    return arrayize(doc.styleSheets[0].cssRules);
   };
 
   escapeCssText = function(cssText) {
@@ -166,10 +170,6 @@ var W=unsafeWindow;
       if ((c = cmp(a[i], b[i]))) return c;
     }
     return 0;
-  };
-
-  arrayize = function(a) {
-    return [].slice.call(a);
   };
 
   inlineCss = function(root, rules) {
@@ -287,7 +287,7 @@ var W=unsafeWindow;
               return gistJsRes = arguments[0];
             };
           })(),
-          lineno: 169
+          lineno: 170
         }),
         onerror: function(err) {
           cb(err);
@@ -320,7 +320,7 @@ var W=unsafeWindow;
                 return gistCssRes = arguments[0];
               };
             })(),
-            lineno: 183
+            lineno: 184
           }),
           onerror: function(err) {
             cb(err);
@@ -438,7 +438,7 @@ var W=unsafeWindow;
                   _this.statusPb.stop(true).css('opacity', '1').show().animate({
                     width: p
                   }, 500, 'linear', __iced_deferrals.defer({
-                    lineno: 284
+                    lineno: 285
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -449,7 +449,7 @@ var W=unsafeWindow;
                       funcname: "setStatus"
                     });
                     _this.statusPb.fadeOut(1500, 'swing', __iced_deferrals.defer({
-                      lineno: 285
+                      lineno: 286
                     }));
                     __iced_deferrals._fulfill();
                   })(function() {
@@ -501,7 +501,7 @@ var W=unsafeWindow;
                 return gistHtml = arguments[2];
               };
             })(),
-            lineno: 302
+            lineno: 303
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -580,7 +580,7 @@ var W=unsafeWindow;
                         return gist = arguments[1];
                       };
                     })(),
-                    lineno: 331
+                    lineno: 332
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -636,7 +636,7 @@ var W=unsafeWindow;
               return html = arguments[1];
             };
           })(),
-          lineno: 355
+          lineno: 356
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -669,12 +669,11 @@ var W=unsafeWindow;
       filename: "renren-markdown.user.iced"
     });
     checkPageReady(__iced_deferrals.defer({
-      lineno: 377
+      lineno: 378
     }));
     __iced_deferrals._fulfill();
   })(function() {
-    rrmd.init();
-    return rrmd.JQ = JQ;
+    return rrmd.init();
   });
 
 }).call(this);

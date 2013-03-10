@@ -4,7 +4,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.32
+// @version       0.4.33
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/blog/*edit*
@@ -30,6 +30,8 @@ class DelayTrigger
 
 # module inlinify {
 
+arrayize=(a)->[].slice.call(a)
+
 # adapted from: http://stackoverflow.com/questions/298750/how-do-i-select-text-nodes-with-jquery
 getTextNodesIn=(node)->
   textNodes = []
@@ -47,7 +49,7 @@ getTextNodesIn=(node)->
 getCssRules=(css)->
   doc=JQ('<iframe />').css('display', 'none').appendTo('body')[0].contentDocument
   JQ(doc).find('head').append("<style>#{css}</style>")
-  doc.styleSheets[0].cssRules
+  arrayize doc.styleSheets[0].cssRules
 
 # escape cssText to avoid single-double-quote hell
 escapeCssText=(cssText)->
@@ -68,7 +70,6 @@ cmpSpec=(a, b)->
     if (c=cmp(a[i], b[i])) then return c
   return 0
 
-arrayize=(a)->[].slice.call(a)
 inlineCss=(root, rules)->
   arrayize(rules).forEach (r)->
     sel=r.selectorText
@@ -379,6 +380,5 @@ await checkPageReady defer()
 # await W.MathJax.Hub.Queue [defer()]
 
 rrmd.init()
-rrmd.JQ=JQ # for debugger access
 
 # } //module rrmd
