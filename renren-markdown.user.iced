@@ -30,7 +30,7 @@ class DelayTrigger
 
 # module inlinify {
 
-arrayize=(a)->[].slice.call(a)
+arrayize=(a)->if a?.length then [].slice.call(a) else []
 
 # adapted from: http://stackoverflow.com/questions/298750/how-do-i-select-text-nodes-with-jquery
 getTextNodesIn=(node)->
@@ -71,28 +71,22 @@ cmpSpec=(a, b)->
   return 0
 
 inlineCss=(root, rules)->
-  arrayize(rules).forEach (r)->
-    sel=r.selectorText
-    spec=getSpec(sel)
-    if (selected=root.querySelectorAll(sel))?
-      arrayize(selected).forEach (el)->
-        if !el.stylePlus?
-          el.stylePlus={}
+  valid=(key)->key && key[0]!='-'
+  arrayize(rules)
+    .map (r)->
+      {r, spec: getSpec(r.style)}
+    .sort (a, b)->
+      cmpSpec(a.spec, b.spec)
+    .map((r)->r.r)
+    .reverse().forEach (r)->
+      sel=r.selectorText
+      arrayize(root.querySelectorAll(sel)).forEach (el)->
         for key in (style=r.style)
-          value=style.getPropertyValue(key) 
-          unless (orig=el.stylePlus[key])? && cmpSpec(orig.spec, spec)>0
-            el.stylePlus[key]={spec, value}
+          if valid(key)
+            value=style.getPropertyValue(key)
+            orig=el.style.getPropertyValue(key)
+            if !orig then el.style.setPropertyValue(key, value, '')
         null
-  arrayize(root.querySelectorAll('*')).forEach (el)->
-    if el.stylePlus?
-      for key in el.style
-        el.stylePlus[key]=el.style.getPropertyValue(key)
-      for k, p of el.stylePlus
-        # dirty workaround: firefox `padding-right-value` problem
-        if k.match(/-value$/) && k!='drop-initial-value'
-          k=k[0...(k.lastIndexOf('-'))]
-        el.style.setProperty(k, p.value, '')
-      delete el.stylePlus
       null
   root
 

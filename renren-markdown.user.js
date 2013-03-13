@@ -115,7 +115,11 @@ var W=unsafeWindow;
   })();
 
   arrayize = function(a) {
-    return [].slice.call(a);
+    if (a != null ? a.length : void 0) {
+      return [].slice.call(a);
+    } else {
+      return [];
+    }
   };
 
   getTextNodesIn = function(node) {
@@ -173,48 +177,36 @@ var W=unsafeWindow;
   };
 
   inlineCss = function(root, rules) {
-    arrayize(rules).forEach(function(r) {
-      var sel, selected, spec;
+    var valid;
+    valid = function(key) {
+      return key && key[0] !== '-';
+    };
+    arrayize(rules).map(function(r) {
+      return {
+        r: r,
+        spec: getSpec(r.style)
+      };
+    }).sort(function(a, b) {
+      return cmpSpec(a.spec, b.spec);
+    }).map(function(r) {
+      return r.r;
+    }).reverse().forEach(function(r) {
+      var sel;
       sel = r.selectorText;
-      spec = getSpec(sel);
-      if ((selected = root.querySelectorAll(sel)) != null) {
-        return arrayize(selected).forEach(function(el) {
-          var key, orig, style, value, _i, _len, _ref;
-          if (el.stylePlus == null) el.stylePlus = {};
-          _ref = (style = r.style);
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            key = _ref[_i];
-            value = style.getPropertyValue(key);
-            if (!(((orig = el.stylePlus[key]) != null) && cmpSpec(orig.spec, spec) > 0)) {
-              el.stylePlus[key] = {
-                spec: spec,
-                value: value
-              };
-            }
-          }
-          return null;
-        });
-      }
-    });
-    arrayize(root.querySelectorAll('*')).forEach(function(el) {
-      var k, key, p, _i, _len, _ref, _ref1;
-      if (el.stylePlus != null) {
-        _ref = el.style;
+      arrayize(root.querySelectorAll(sel)).forEach(function(el) {
+        var key, orig, style, value, _i, _len, _ref;
+        _ref = (style = r.style);
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           key = _ref[_i];
-          el.stylePlus[key] = el.style.getPropertyValue(key);
-        }
-        _ref1 = el.stylePlus;
-        for (k in _ref1) {
-          p = _ref1[k];
-          if (k.match(/-value$/) && k !== 'drop-initial-value') {
-            k = k.slice(0, k.lastIndexOf('-'));
+          if (valid(key)) {
+            value = style.getPropertyValue(key);
+            orig = el.style.getPropertyValue(key);
+            if (!orig) el.style.setPropertyValue(key, value, '');
           }
-          el.style.setProperty(k, p.value, '');
         }
-        delete el.stylePlus;
         return null;
-      }
+      });
+      return null;
     });
     return root;
   };
@@ -292,7 +284,7 @@ var W=unsafeWindow;
               return gistJsRes = arguments[0];
             };
           })(),
-          lineno: 174
+          lineno: 168
         }),
         onerror: function(err) {
           cb(err);
@@ -325,7 +317,7 @@ var W=unsafeWindow;
                 return gistCssRes = arguments[0];
               };
             })(),
-            lineno: 188
+            lineno: 182
           }),
           onerror: function(err) {
             cb(err);
@@ -443,7 +435,7 @@ var W=unsafeWindow;
                   _this.statusPb.stop(true).css('opacity', '1').show().animate({
                     width: p
                   }, 500, 'linear', __iced_deferrals.defer({
-                    lineno: 288
+                    lineno: 282
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -454,7 +446,7 @@ var W=unsafeWindow;
                       funcname: "setStatus"
                     });
                     _this.statusPb.fadeOut(1500, 'swing', __iced_deferrals.defer({
-                      lineno: 289
+                      lineno: 283
                     }));
                     __iced_deferrals._fulfill();
                   })(function() {
@@ -506,7 +498,7 @@ var W=unsafeWindow;
                 return gistHtml = arguments[2];
               };
             })(),
-            lineno: 306
+            lineno: 300
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -585,7 +577,7 @@ var W=unsafeWindow;
                         return gist = arguments[1];
                       };
                     })(),
-                    lineno: 335
+                    lineno: 329
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -641,7 +633,7 @@ var W=unsafeWindow;
               return html = arguments[1];
             };
           })(),
-          lineno: 359
+          lineno: 353
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -674,7 +666,7 @@ var W=unsafeWindow;
       filename: "renren-markdown.user.iced"
     });
     checkPageReady(__iced_deferrals.defer({
-      lineno: 381
+      lineno: 375
     }));
     __iced_deferrals._fulfill();
   })(function() {
