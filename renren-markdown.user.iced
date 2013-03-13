@@ -72,9 +72,14 @@ cmpSpec=(a, b)->
 
 inlineCss=(root, rules)->
   valid=(key)->key && key[0]!='-'
+  prune=(key)->
+    # dirty workaround: firefox `padding-right-value` problem
+    if key.match(/-value$/) && key!='drop-initial-value'
+      key=key[0...(key.lastIndexOf('-'))] 
+    key
   arrayize(rules)
     .map (r)->
-      {r, spec: getSpec(r.style)}
+      {r, spec: getSpec(r.selectorText)}
     .sort (a, b)->
       cmpSpec(a.spec, b.spec)
     .map((r)->r.r)
@@ -83,9 +88,10 @@ inlineCss=(root, rules)->
       arrayize(root.querySelectorAll(sel)).forEach (el)->
         for key in (style=r.style)
           if valid(key)
+            key=prune(key)
             value=style.getPropertyValue(key)
             orig=el.style.getPropertyValue(key)
-            if !orig then el.style.setPropertyValue(key, value, '')
+            if !orig then el.style.setProperty(key, value, '')
         null
       null
   root
