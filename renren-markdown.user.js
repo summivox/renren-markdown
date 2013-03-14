@@ -50,7 +50,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.34
+// @version       0.4.35
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/blog/*edit*
