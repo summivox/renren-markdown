@@ -4,7 +4,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.35
+// @version       0.4.36
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/blog/*edit*
@@ -122,14 +122,6 @@ spanifyAll=(el)->
         .replace(/\ /g, '&nbsp;')
         .replace(/[\n\r\v]/g, '<br/>')
       JQ(text).replaceWith("<span>#{str}</span>")
-    #this.style.whiteSpace='pre'
-
-  # workaround for td over-shrinking
-  jel.find('td').children().each ->
-    this.style.whiteSpace||='nowrap'
-
-  # flatten table (strips t{head, body, foot})
-  jel.find('tbody, thead, tfoot').children().unwrap()
 
   # container -> span with corresponding `display: xxx`
   # NOTE: order of operation is significant!
@@ -141,6 +133,7 @@ spanifyAll=(el)->
     ['hr', 'block']
     ['td, th', 'table-cell'] # table family
     ['tr', 'table-row']
+    ['tbody, thead, tfoot', 'table-row-group']
     ['table', 'table']
   ].forEach (arg)->
     ((sel, disp)->
@@ -321,6 +314,9 @@ W.rrmd=rrmd=
           inlineCss this, gistCssRules # necessary: for code highlighting
           JQ(this).parentsUntil('div.gist').last().replaceWith(this)
           null
+        # special: prevent accident wrapping of scrolled content
+        jel.find('.gist-data').each ->
+          @style.whiteSpace||='nowrap'
         el=spanifyAll inlineCss jel.wrapAll('<span />').parent()[0], @cssRules
         cb null, @saved[id]=el
 

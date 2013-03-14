@@ -50,7 +50,7 @@
 // ==UserScript==
 // @name          renren-markdown
 // @namespace     http://github.com/smilekzs
-// @version       0.4.35
+// @version       0.4.36
 // @description   write well-formatted blogs on renren.com with markdown
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/blog/*edit*
@@ -244,12 +244,7 @@ var W=unsafeWindow;
       }
       return _results;
     });
-    jel.find('td').children().each(function() {
-      var _base;
-      return (_base = this.style).whiteSpace || (_base.whiteSpace = 'nowrap');
-    });
-    jel.find('tbody, thead, tfoot').children().unwrap();
-    [['pre, code', 'inline'], ['s, del', 'inline'], ['div, p, blockquote, q, article', 'block'], ['h1, h2, h3, h4, h5, h6', 'block'], ['hr', 'block'], ['td, th', 'table-cell'], ['tr', 'table-row'], ['table', 'table']].forEach(function(arg) {
+    [['pre, code', 'inline'], ['s, del', 'inline'], ['div, p, blockquote, q, article', 'block'], ['h1, h2, h3, h4, h5, h6', 'block'], ['hr', 'block'], ['td, th', 'table-cell'], ['tr', 'table-row'], ['tbody, thead, tfoot', 'table-row-group'], ['table', 'table']].forEach(function(arg) {
       (function(sel, disp) {
         var s, x, _base;
         while (x = jel.find(sel)[0]) {
@@ -295,7 +290,7 @@ var W=unsafeWindow;
               return gistJsRes = arguments[0];
             };
           })(),
-          lineno: 177
+          lineno: 170
         }),
         onerror: function(err) {
           cb(err);
@@ -328,7 +323,7 @@ var W=unsafeWindow;
                 return gistCssRes = arguments[0];
               };
             })(),
-            lineno: 191
+            lineno: 184
           }),
           onerror: function(err) {
             cb(err);
@@ -408,7 +403,7 @@ var W=unsafeWindow;
               return __slot_1.cssRules = arguments[0];
             };
           })(_this),
-          lineno: 239
+          lineno: 232
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -465,7 +460,7 @@ var W=unsafeWindow;
                   _this.statusPb.stop(true).css('opacity', '1').show().animate({
                     width: p
                   }, 500, 'linear', __iced_deferrals.defer({
-                    lineno: 291
+                    lineno: 284
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -476,7 +471,7 @@ var W=unsafeWindow;
                       funcname: "setStatus"
                     });
                     _this.statusPb.fadeOut(1500, 'swing', __iced_deferrals.defer({
-                      lineno: 292
+                      lineno: 285
                     }));
                     __iced_deferrals._fulfill();
                   })(function() {
@@ -528,7 +523,7 @@ var W=unsafeWindow;
                 return gistHtml = arguments[2];
               };
             })(),
-            lineno: 309
+            lineno: 302
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -551,7 +546,7 @@ var W=unsafeWindow;
                         return __slot_1.cssRules = arguments[0];
                       };
                     })(_this),
-                    lineno: 314
+                    lineno: 307
                   }));
                   __iced_deferrals._fulfill();
                 })(__iced_k);
@@ -566,6 +561,10 @@ var W=unsafeWindow;
                 inlineCss(this, gistCssRules);
                 JQ(this).parentsUntil('div.gist').last().replaceWith(this);
                 return null;
+              });
+              jel.find('.gist-data').each(function() {
+                var _base;
+                return (_base = this.style).whiteSpace || (_base.whiteSpace = 'nowrap');
               });
               el = spanifyAll(inlineCss(jel.wrapAll('<span />').parent()[0], _this.cssRules));
               return __iced_k(cb(null, _this.saved[id] = el));
@@ -635,7 +634,7 @@ var W=unsafeWindow;
                         return gist = arguments[1];
                       };
                     })(),
-                    lineno: 342
+                    lineno: 338
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -691,7 +690,7 @@ var W=unsafeWindow;
               return html = arguments[1];
             };
           })(),
-          lineno: 366
+          lineno: 362
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -724,7 +723,7 @@ var W=unsafeWindow;
       filename: "renren-markdown.user.iced"
     });
     checkPageReady(__iced_deferrals.defer({
-      lineno: 388
+      lineno: 384
     }));
     __iced_deferrals._fulfill();
   })(function() {
