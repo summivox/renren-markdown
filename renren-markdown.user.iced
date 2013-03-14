@@ -48,9 +48,9 @@ getTextNodesIn=(node)->
 # get css rules from css text
 getCssRulesN=0
 getCssRules=(css, cb)->
-  doc=JQ("""<iframe id="rrmd_#{getCssRulesN++}" src="about:blank" style="display: none;" />""").appendTo('body')[0].contentDocument
+  doc=JQ("""<iframe id="rrmd_#{getCssRulesN++}" style="position: fixed; left: -1000px; width: 1px; height: 1px;" />""").appendTo('body')[0].contentDocument
   JQ(doc).ready ->
-    doc.head.innerHTML="<style>#{css}</style>"
+    doc.write """<style type="text/css">#{css}</style>"""
     cb arrayize doc.styleSheets[0].cssRules
 
 # escape cssText to avoid single-double-quote hell
@@ -87,8 +87,9 @@ inlineCss=(root, rules)->
     .map((r)->r.r)
     .reverse().forEach (r)->
       sel=r.selectorText
+      style=r.style
       arrayize(root.querySelectorAll(sel)).forEach (el)->
-        for key in (style=r.style)
+        for key in style
           if !valid(key) then continue
           key=prune(key)
           value=style.getPropertyValue(key).trim()
@@ -230,7 +231,6 @@ W.rrmd=rrmd=
     removeAnchorQ: true
 
   init: ->
-    await getCssRules(RRMD_STYLE, defer(@cssRules))
     @editor=W.tinymce.editors[0]
     @ui.init()
     @ui.area.val(unembed @editor.getContent())
@@ -321,6 +321,8 @@ W.rrmd=rrmd=
         cb null, @saved[id]=el
 
   conv: (cb)->
+    if !@cssRules?
+      await getCssRules(RRMD_STYLE, defer(@cssRules))
     md=@ui.area.val()
     try
       el=@markdown(md)
