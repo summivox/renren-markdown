@@ -46,10 +46,12 @@ getTextNodesIn=(node)->
   return textNodes
 
 # get css rules from css text
-getCssRules=(css)->
-  doc=JQ('<iframe />').css('display', 'none').appendTo('body')[0].contentDocument
-  JQ(doc).find('head').append("<style>#{css}</style>")
-  arrayize doc.styleSheets[0].cssRules
+getCssRulesN=0
+getCssRules=(css, cb)->
+  doc=JQ("""<iframe id="rrmd_#{getCssRulesN++}" src="about:blank" style="display: none;" />""").appendTo('body')[0].contentDocument
+  JQ(doc).ready ->
+    doc.head.innerHTML="<style>#{css}</style>"
+    cb arrayize doc.styleSheets[0].cssRules
 
 # escape cssText to avoid single-double-quote hell
 escapeCssText=(cssText)->
@@ -71,13 +73,13 @@ cmpSpec=(a, b)->
   return 0
 
 inlineCss=(root, rules)->
-  valid=(key)->key && key[0]!='-'
-  prune=(key)->
+  valid=(s)->s && s[0]!='-'
+  prune=(s)->
     # dirty workaround: firefox `padding-right-value` problem
-    if key.match(/-value$/) && key!='drop-initial-value'
-      key=key[0...(key.lastIndexOf('-'))] 
-    key
-  arrayize(rules)
+    if s.match(/-value$/) && s!='drop-initial-value'
+      s=s[0...(s.lastIndexOf('-'))] 
+    s
+  rules
     .map (r)->
       {r, spec: getSpec(r.selectorText)}
     .sort (a, b)->
@@ -87,11 +89,12 @@ inlineCss=(root, rules)->
       sel=r.selectorText
       arrayize(root.querySelectorAll(sel)).forEach (el)->
         for key in (style=r.style)
-          if valid(key)
-            key=prune(key)
-            value=style.getPropertyValue(key)
-            orig=el.style.getPropertyValue(key)
-            if !orig then el.style.setProperty(key, value, '')
+          if !valid(key) then continue
+          key=prune(key)
+          value=style.getPropertyValue(key).trim()
+          if !valid(value) then continue
+          orig=el.style.getPropertyValue(key)
+          if !orig then el.style.setProperty(key, value, '')
         null
       null
   root
@@ -234,7 +237,7 @@ W.rrmd=rrmd=
     removeAnchorQ: true
 
   init: ->
-    @cssRules=getCssRules(RRMD_STYLE)
+    await getCssRules(RRMD_STYLE, defer(@cssRules))
     @editor=W.tinymce.editors[0]
     @ui.init()
     @ui.area.val(unembed @editor.getContent())
@@ -308,7 +311,8 @@ W.rrmd=rrmd=
       if err?
         cb err; throw err
       else
-        if !@cssRules? then @cssRules=getCssRules(gistCss)
+        if !@cssRules?
+          await getCssRules(gistCss, defer(@cssRules))
         gistCssRules=@cssRules
         jel=JQ(gistHtml)
         # special: promote markdown content
@@ -322,7 +326,10 @@ W.rrmd=rrmd=
 
   conv: (cb)->
     md=@ui.area.val()
-    el=@markdown(md)
+    try
+      el=@markdown(md)
+    catch err
+      cb(err); throw err
     @ui.setStatus(null, null, 0.01)
 
     if @options.embedGistQ
