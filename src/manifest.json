@@ -1,0 +1,24 @@
+{
+  "manifest_version": 2,
+  "converted_from_user_script": true,
+  "name":         "<%= pkg.name %>",
+  "version":      "<%= pkg.version %>",
+  "description":  "<%= pkg.description %>",
+  "content_scripts": [
+    {
+      "exclude_globs": [],
+      "include_globs": ["*"],
+      "js": ["renren-markdown.user.js"],
+      "matches": [
+        "http://blog.renren.com/blog/*Blog*",
+        "http://blog.renren.com/blog/*edit*",
+        "http://blog.renren.com/*Entry*"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "permissions": [
+    "http://*.github.com/",
+    "https://*.github.com/"
+  ]
+}

@@ -59,6 +59,17 @@ module.exports = (grunt) ->
 
 
   ############
+  # template
+
+  grunt.registerMultiTask 'template', ->
+    for file in @files
+      src=file.src[0]
+      dest=file.dest
+      cont=grunt.template.process grunt.file.read(src, encoding: 'utf-8')
+      grunt.file.write(dest, cont, encoding: 'utf-8')
+
+
+  ############
   # main config
 
   grunt.initConfig
@@ -112,6 +123,12 @@ module.exports = (grunt) ->
         ]
         dest: 'dist/renren-markdown.user.js'
 
+    template:
+      manifest:
+        files: [
+          {src: 'src/manifest.json', dest: 'dist/manifest.json'}
+        ]
+
     clean:
       build: ['build/*']
       release: ['dist/*']
@@ -126,4 +143,9 @@ module.exports = (grunt) ->
   grunt.registerTask 'gm', [
     'iced:main'
     'concat:gm'
+  ]
+  
+  grunt.registerTask 'chrome', [
+    'gm'
+    'template:manifest'
   ]
