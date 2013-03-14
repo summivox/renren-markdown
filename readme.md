@@ -56,10 +56,12 @@ grunt gm
 
 
 **2013-03-14 : v0.5.0**
-    * migrate to [Grunt][]
-    * more non-standard-browser-behavior-resistance (against FireFox)
-    * better css handling
+
+* migrate to [Grunt][]
+* more non-standard-browser-behavior-resistance (against FireFox)
+* better css handling
 
 
 **2013-03-10 : v0.4.34**
-    * FIX: `\t` handling (hardcoded as 8 spaces)
+
+* FIX: `\t` handling (hardcoded as 8 spaces)
