@@ -99,8 +99,8 @@ module.exports = (grunt) ->
     uglify:
       lib:
         files:
-          'build/marked.min.js': ['lib/marked.js']
-          'build/specificity.min.js': ['lib/specificity.js']
+          'build/lib/marked.min.js': ['lib/marked.js']
+          'build/lib/specificity.min.js': ['lib/specificity.js']
 
     cssmin:
       markdown:
@@ -117,8 +117,8 @@ module.exports = (grunt) ->
       lib: # all minified libraries
         src: [
           'lib/jquery-1.8.2.min.js'
-          'build/marked.min.js'
-          'build/specificity.min.js'
+          'build/lib/marked.min.js'
+          'build/lib/specificity.min.js'
         ]
         dest: 'build/lib.js'
       main: # common code (without compatibility layer)
@@ -136,9 +136,8 @@ module.exports = (grunt) ->
         ]
         dest: 'dist/chrome/js/renren-markdown.chrome.js'
       gm:
-        options:
-          banner: grunt.file.read('src/gm/metadata.js', encoding: 'utf-8')
         src: [
+          'build/metadata.js'
           'build/iced/gm/env.js'
           'build/renren-markdown.main.js'
         ]
@@ -151,21 +150,34 @@ module.exports = (grunt) ->
           {src: 'assets/icon.png', dest: 'dist/chrome/img/icon.png'}
         ]
 
-    template:
+    template: # for metadata
       chrome:
         files: [
           {src: 'src/chrome/manifest.json', dest: 'dist/chrome/manifest.json'}
+        ]
+      gm:
+        files: [
+          {src: 'src/gm/metadata.js', dest: 'build/metadata.js'}
         ]
 
     clean:
       build: ['build/*']
       release: ['dist/*']
 
-  grunt.registerTask 'prepare', [
+
+  grunt.registerTask 'lib', [
+    'concat:lib'
     'uglify:lib'
+  ]
+
+  grunt.registerTask 'css', [
     'cssmin:markdown'
     'css2js:markdown'
-    'concat:lib'
+  ]
+
+  grunt.registerTask 'prepare', [
+    'lib'
+    'css'
   ]
 
   grunt.registerTask 'compile', [
@@ -174,12 +186,13 @@ module.exports = (grunt) ->
   ]
 
   grunt.registerTask 'chrome', [
-    'concat:chrome'
-    'copy:chrome'
     'template:chrome'
+    'copy:chrome'
+    'concat:chrome'
   ]
 
   grunt.registerTask 'gm', [
+    'template:gm'
     'concat:gm'
   ]
 
