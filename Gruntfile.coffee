@@ -168,15 +168,15 @@ module.exports = (grunt) ->
     'concat:lib'
   ]
 
+  grunt.registerTask 'compile', [
+    'iced:all'
+    'concat:main'
+  ]
+
   grunt.registerTask 'chrome', [
     'concat:chrome'
     'copy:chrome'
     'template:chrome'
-  ]
-
-  grunt.registerTask 'compile', [
-    'iced:all'
-    'concat:main'
   ]
 
   grunt.registerTask 'gm', [

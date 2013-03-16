@@ -33,7 +33,7 @@ http://blog.renren.com/ uses a modified version of [TinyMCE][] as its rich-text 
 
 ## Install (Chrome plugin)
 
-TBD
+Use chrome store link: https://chrome.google.com/webstore/detail/renren-markdown/iiabjaofopjooifoclbpdmffjlgbplod
 
 
 ## Build
@@ -44,9 +44,11 @@ Renren-markdown is built using [Grunt][].
 npm install
 grunt clean
 grunt prepare
-grunt gm
-grunt chrome
+grunt
 ```
+
+Chrome plugin: `dist/chrome` (unpacked)  
+Userscript: `dist/gm`
 
 [Grunt]: http://gruntjs.com/
 
@@ -54,6 +56,12 @@ grunt chrome
 ## Revision History
 
 (before v0.4.34: not kept)
+
+
+**2013-03-16 : v0.5.2**
+
+* unified build for chrome and greasemonkey
+* FIX: now circumvents blog.renren.com "@-mention" implementation bug
 
 
 **2013-03-14 : v0.5.0**
