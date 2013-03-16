@@ -174,12 +174,17 @@ module.exports = (grunt) ->
     'template:chrome'
   ]
 
+  grunt.registerTask 'compile', [
+    'iced:all'
+    'concat:main'
+  ]
+
   grunt.registerTask 'gm', [
     'concat:gm'
   ]
 
   grunt.registerTask 'default', [
-    'iced:all'
+    'compile'
     'chrome'
     'gm'
   ]

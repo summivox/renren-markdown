@@ -4,10 +4,7 @@
 inject = (name, callback) ->
   s = document.createElement 'script'
   s.src = chrome.extension.getURL 'js/' + name
-  s.onload = callback or ->
-    document.head.appendChild s
-
-inject 'renren-markdown.chrome.js'
+  document.head.appendChild s
 
 receiveMessage = (event)->
   if (event.origin != "http://blog.renren.com")
@@ -28,5 +25,7 @@ checkPageReady = (cb)->
   ), 1000
 
 await checkPageReady defer()
+
+inject 'renren-markdown.chrome.js'
 
 window.frames[0].addEventListener("message", receiveMessage, false)

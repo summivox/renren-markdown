@@ -1,7 +1,7 @@
 {
   "name": "renren-markdown",
   "description": "Markdown and Gist support for http://blog.renren.com/",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "homepage": "https://github.com/smilekzs/renren-markdown",
   "author": {
     "name": "smilekzs"
