@@ -45,6 +45,7 @@ npm install
 grunt clean
 grunt prepare
 grunt gm
+grunt chrome
 ```
 
 [Grunt]: http://gruntjs.com/

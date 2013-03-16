@@ -67,8 +67,12 @@ module.exports = (grunt) ->
       dest=file.dest
       cont=grunt.template.process grunt.file.read(src, encoding: 'utf-8')
       grunt.file.write(dest, cont, encoding: 'utf-8')
-
-
+  
+  ############
+  # setenv
+  grunt.registerMultiTask 'setenv', ->
+    grunt.config.set 'window', @data
+  
   ############
   # main config
 
@@ -76,17 +80,21 @@ module.exports = (grunt) ->
     pkg: grunt.file.readJSON('package.json')
 
     iced:
-      main:
+      gm:
         options:
           runtime: 'inline'
         files: [
           expand: true
-          cwd: 'src'
-          src: ['*.iced']
-          dest: 'build'
-          ext: '.js'
+          src: ['build/renren-markdown.user.iced']
+          dest: ''
+          ext: '.user.js'
         ]
-
+      chrome:
+        options:
+          runtime: 'inline'
+        files:
+          'build/renren-markdown.chrome.js': 'build/renren-markdown.chrome.iced' 
+          'dist/chrome/js/inject.js': 'src/inject.iced' 
     uglify:
       lib:
         files:
@@ -119,16 +127,43 @@ module.exports = (grunt) ->
           'build/lib.js'
           'build/markdown.min.css.js'
           'src/emoticon.js' # TODO: auto emoticon.js
-          'build/renren-markdown.js'
+          'build/renren-markdown.user.js'
         ]
         dest: 'dist/renren-markdown.user.js'
+      chrome:
+        options:
+          banner: grunt.file.read('src/banner.js', encoding: 'utf-8')
+        src: [
+          'build/lib.js'
+          'build/markdown.min.css.js'
+          'src/emoticon.js' # TODO: auto emoticon.js
+          'build/renren-markdown.chrome.js'
+        ]
+        dest: 'dist/chrome/js/renren-markdown.chrome.js'
+      chromeiced:
+        src: [
+          'src/xmlrequest.iced'
+          'build/renren-markdown.chrome.iced'
+        ]
+        dest: 'build/renren-markdown.chrome.iced'
 
     template:
       manifest:
         files: [
-          {src: 'src/manifest.json', dest: 'dist/manifest.json'}
+          {src: 'src/manifest.json', dest: 'dist/chrome/manifest.json'}
         ]
-
+      chrome:
+        files: [
+          {src: 'src/renren-markdown.iced', dest: 'build/renren-markdown.chrome.iced'}
+        ]
+      gm:
+        files: [
+          {src: 'src/renren-markdown.iced', dest: 'build/renren-markdown.user.iced'}
+        ]
+    add_chrome_files: grunt.file.copy('src/icon.png', 'dist/chrome/img/icon.png')
+    setenv:
+      chrome: 'window'
+      gm: 'unsafeWindow'
     clean:
       build: ['build/*']
       release: ['dist/*']
@@ -141,11 +176,17 @@ module.exports = (grunt) ->
   ]
 
   grunt.registerTask 'gm', [
-    'iced:main'
+    'setenv:gm'
+    'template:gm'
+    'iced:gm'
     'concat:gm'
   ]
   
   grunt.registerTask 'chrome', [
-    'gm'
+    'setenv:chrome'
+    'template:chrome'
     'template:manifest'
+    'concat:chromeiced'
+    'iced:chrome'
+    'concat:chrome'
   ]

@@ -4,8 +4,7 @@
 # aliases
 
 JQ=jQuery
-JQ.noConflict()
-W=<%= window %>
+W=window1
 
 # utilities
 
