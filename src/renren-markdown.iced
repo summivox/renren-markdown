@@ -236,6 +236,7 @@ W.rrmd=rrmd=
       tables: true,
 
     @editor=W.tinymce.editors[0]
+    @editor.mentionPreSubmit=->null # circumvent "@a\nb()" renren bug
     @ui.init()
     @ui.area.val(unembed @editor.getContent())
     @dt=new DelayTrigger =>@update()
@@ -357,7 +358,8 @@ W.rrmd=rrmd=
     if @options.removeAnchorQ
       el.find('a[name]').remove()
 
-    hmd=embed(el.wrapAll('<span />').parent().html()||'', md)
+    h=el.wrapAll('<span />').parent().html()||''
+    hmd=embed(h, md)
     cb null, hmd
 
   update: ->
