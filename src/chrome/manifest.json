@@ -1,6 +1,5 @@
 {
   "manifest_version": 2,
-  "converted_from_user_script": true,
   "name":         "<%= pkg.name %>",
   "version":      "<%= pkg.version %>",
   "description":  "<%= pkg.description %>",
@@ -8,7 +7,7 @@
     {
       "exclude_globs": [],
       "include_globs": ["*"],
-      "js": ["renren-markdown.user.js"],
+      "js": ["js/inject.js"],
       "matches": [
         "http://blog.renren.com/blog/*Blog*",
         "http://blog.renren.com/blog/*edit*",
@@ -17,8 +16,15 @@
       "run_at": "document_end"
     }
   ],
+  "icons": {
+        "128": "img/icon.png",
+        "16": "img/icon.png",
+        "32": "img/icon.png",
+        "48": "img/icon.png"
+  },
   "permissions": [
     "http://*.github.com/",
     "https://*.github.com/"
-  ]
+  ],
+  "web_accessible_resources": ["js/renren-markdown.chrome.js"]
 }

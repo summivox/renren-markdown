@@ -1,10 +1,16 @@
 # vim: nowrap
 
 
+# grants:
+#   GM_xmlhttpRequest
+#   unsafeWindow
+
+
 # aliases
 
 JQ=jQuery
-W=unsafeWindow
+JQ.noConflict()
+
 
 # utilities
 
@@ -196,6 +202,7 @@ getGist=(id, cb)->
 
 # } //module getGist
 
+
 # module rrmd {
 
 # encode & embed markdown source into generated html
@@ -214,8 +221,8 @@ unembed=(h)->
   catch e then return ''
 
 W.rrmd=rrmd=
-  lib:
-    {JQ, marked, SPECIFICITY}
+  $: # for console access
+    {JQ, marked, SPECIFICITY, b64_to_str, str_to_b64}
 
   options:
     delay: 400
@@ -376,13 +383,11 @@ W.rrmd=rrmd=
 checkPageReady=(cb)->
   tid=setInterval (->
     if W.tinymce?.editors?[0]?
-      # && W.MathJax?.isReady
       clearInterval(tid)
       cb()
   ), 1000
 
 await checkPageReady defer()
-# await W.MathJax.Hub.Queue [defer()]
 
 rrmd.init()
 
