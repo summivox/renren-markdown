@@ -67,6 +67,7 @@ module.exports = (grunt) ->
       src=file.src[0]
       dest=file.dest
       cont=grunt.template.process grunt.file.read(src, encoding: 'utf-8')
+      cont=cont.replace(/\r\n/g, '\n')
       grunt.file.write(dest, cont, encoding: 'utf-8')
 
 
