@@ -166,8 +166,8 @@ module.exports = (grunt) ->
 
 
   grunt.registerTask 'lib', [
-    'concat:lib'
     'uglify:lib'
+    'concat:lib'
   ]
 
   grunt.registerTask 'css', [
