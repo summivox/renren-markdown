@@ -97,6 +97,8 @@ module.exports = (grunt) ->
         ]
 
     uglify:
+      options:
+        preserveComments: 'some'
       lib:
         files:
           'build/lib/marked.min.js': ['lib/marked.js']
