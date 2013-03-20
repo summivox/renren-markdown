@@ -22,7 +22,7 @@ checkPageReady = (cb)->
     if window.frames?[0]?
       clearInterval(tid)
       cb()
-  ), 1000
+  ), 250
 
 await checkPageReady defer()
 
