@@ -58,6 +58,11 @@ Userscript: `dist/gm`
 (before v0.4.34: not kept)
 
 
+**2013-03-28 : v0.5.4**
+
+* workaround renren blog site update
+
+
 **2013-03-16 : v0.5.2**
 
 * unified build for chrome and greasemonkey
