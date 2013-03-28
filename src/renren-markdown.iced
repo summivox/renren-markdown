@@ -252,7 +252,10 @@ W.rrmd=rrmd=
     html:
       """
       <div id="rrmd_wrapper" style="margin: 0 0 1em 0">
-        <textarea id="rrmd_area" style="font-family: Consolas, 'Inconsolata', 'Courier New', 'Monospace';" placeholder="Type markdown _here_!"></textarea>
+        <textarea id="rrmd_area" style="
+          font-family: Consolas, 'Inconsolata', 'Courier New', 'Monospace';
+          width: 100%; height: 20em;
+        " placeholder="Type markdown _here_!"></textarea>
         <div id="rrmd_status" style="margin: 0.5em 0 0 0;">
           <span id="rrmd_status_icon"></span>
           <span id="rrmd_status_text"></span>
