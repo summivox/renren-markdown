@@ -2,14 +2,8 @@
 
 
 # grants:
-#   GM_xmlhttpRequest
+#   rrmdEnv.xhr
 #   unsafeWindow
-
-
-# aliases
-
-JQ=jQuery
-JQ.noConflict()
 
 
 # utilities
@@ -47,8 +41,8 @@ getTextNodesIn=(node)->
 # get css rules from css text
 getCssRulesN=0
 getCssRules=(css, cb)->
-  doc=JQ("""<iframe id="rrmd_#{getCssRulesN++}" style="position: fixed; left: -1000px; width: 1px; height: 1px;" />""").appendTo('body')[0].contentDocument
-  JQ(doc).ready ->
+  doc=$("""<iframe id="rrmd_#{getCssRulesN++}" style="position: fixed; left: -1000px; width: 1px; height: 1px;" />""").appendTo('body')[0].contentDocument
+  $(doc).ready ->
     doc.write """<style type="text/css">#{css}</style>"""
     cb arrayize doc.styleSheets[0].cssRules
 
@@ -101,18 +95,18 @@ inlineCss=(root, rules)->
 
 # convert everything within `el` into <span>
 spanifyAll=(el)->
-  jel=JQ(el)
+  $el=$(el)
 
   # clone `el` into raw span element
   # also prevent elements with no text from being stripped
   spanify=(el, cssText='')->
-    if !el? then return JQ('<span />')
+    if !el? then return $('<span />')
     s=escapeCssText el.style.cssText
     cont=el.innerHTML.trim() || '<span style="display: none;">&nbsp;</span>'
-    JQ("""<span style="#{s};#{cssText}">#{cont}</span>""")
+    $("""<span style="#{s};#{cssText}">#{cont}</span>""")
 
   # preformatted text: replace with `&amp;` and friends
-  jel.find('pre').each ->
+  $el.find('pre').each ->
     for text in getTextNodesIn(this)
       str=text.data.toString()
         .replace(/\&/g, '&amp;')
@@ -121,7 +115,12 @@ spanifyAll=(el)->
         .replace(/\t/g, '        ') # FIXME: tab stop hardcoded to 8
         .replace(/\ /g, '&nbsp;')
         .replace(/[\n\r\v]/g, '<br/>')
-      JQ(text).replaceWith("<span>#{str}</span>")
+      $(text).replaceWith("<span>#{str}</span>")
+
+  # workaround firefox: text-decoration
+  # must manually inline the style
+  $el.find('s, del').each ->
+    @style.textDecoration='line-through'
 
   # container -> span with corresponding `display: xxx`
   # NOTE: order of operation is significant!
@@ -137,22 +136,22 @@ spanifyAll=(el)->
     ['table', 'table']
   ].forEach (arg)->
     ((sel, disp)->
-      while x=jel.find(sel)[0]
+      while x=$el.find(sel)[0]
         s=spanify(x)
         s[0].style.display||=disp
-        JQ(x).replaceWith(s)
+        $(x).replaceWith(s)
       return
     )(arg...)
     return
 
   # tags using internal span for style
   ['a'].forEach (tag)->
-    jel.find(tag).each ->
+    $el.find(tag).each ->
       st=this.style.cssText
       this.style.cssText=''
-      JQ(this).wrap("""<span style="#{escapeCssText st}"/>""")
+      $(this).wrap("""<span style="#{escapeCssText st}"/>""")
 
-  jel
+  $el
 
 
 # } //module inlinify
@@ -165,7 +164,7 @@ safeParse=(s)->
 
 getGist=(id, cb)->
   gistJsRes=null
-  await GM_xmlhttpRequest {
+  await rrmdEnv.xhr {
     url: "https://gist.github.com/#{id}.js"
     method: 'GET'
     onload: defer(gistJsRes)
@@ -179,7 +178,7 @@ getGist=(id, cb)->
     cb err; throw err
 
   gistCssRes=null
-  await GM_xmlhttpRequest {
+  await rrmdEnv.xhr {
     url: cssUrl
     method: 'GET'
     onload: defer(gistCssRes)
@@ -214,15 +213,15 @@ embed=(h, md)->
   h+"""<span style="visibility: hidden; display: block; height: 0; background-image: url('http://dummy/$rrmd$')">#{str_to_b64(md)}</span>"""
 
 unembed=(h)->
-  list=JQ(h).find('span').filter(->this.style.backgroundImage.match /\$rrmd\$/)
+  list=$(h).find('span').filter(->this.style.backgroundImage.match /\$rrmd\$/)
   b64=list[0]?.innerHTML
   if !b64? then b64=''
   try return b64_to_str(b64)
   catch e then return ''
 
-W.rrmd=rrmd=
+rrmdEnv.window.rrmd=rrmd=
   $: # for console access
-    {JQ, marked, SPECIFICITY, b64_to_str, str_to_b64}
+    {$, marked, SPECIFICITY, b64_to_str, str_to_b64}
 
   options:
     delay: 400
@@ -235,7 +234,7 @@ W.rrmd=rrmd=
       gfm: true,
       tables: true,
 
-    @editor=W.tinymce.editors[0]
+    @editor=rrmdEnv.window.tinymce.editors[0]
     @editor.mentionPreSubmit=->null # circumvent "@a\nb()" renren bug
     @ui.init()
     @ui.area.val(unembed @editor.getContent())
@@ -267,16 +266,16 @@ W.rrmd=rrmd=
       """
     init: ->
 
-      JQ('#editor_tbl').before(@html)
-      @area=JQ('#rrmd_area')
-      @statusText=JQ('#rrmd_status_text')
-      @statusProgress=JQ('#rrmd_status_progress')
-      @statusPb=JQ('#rrmd_status_pb')
+      $('#editor_tbl').before(@html)
+      @area=$('#rrmd_area')
+      @statusText=$('#rrmd_status_text')
+      @statusProgress=$('#rrmd_status_progress')
+      @statusPb=$('#rrmd_status_pb')
 
       # fix "offset blog title input"
-      JQ('#title_bg')[0]?.style.cssText='position: inherit !important; width: 100%'
-      JQ('#title')[0]?.style.cssText='width: 98%'
-      JQ('#editor_ifr')[0]?.contentDocument.body.style.paddingTop="0px"
+      $('#title_bg')[0]?.style.cssText='position: inherit !important; width: 100%'
+      $('#title')[0]?.style.cssText='width: 98%'
+      $('#editor_ifr')[0]?.contentDocument.body.style.paddingTop="0px"
 
     setStatus: (type, text, progress)->
       console.log(progress + ':' + text)
@@ -297,8 +296,8 @@ W.rrmd=rrmd=
             @statusPb.show().animate({width: p}, 750, 'swing')
 
   markdown: (md)->
-    el=JQ marked md
-    if !el.length then return JQ('<span />')
+    el=$ marked md
+    if !el.length then return $('<span />')
     el=el.wrapAll('<span />').parent()[0]
     spanifyAll inlineCss el, @cssRules
 
@@ -315,17 +314,17 @@ W.rrmd=rrmd=
         if !@cssRules?
           await getCssRules(gistCss, defer(@cssRules))
         gistCssRules=@cssRules
-        jel=JQ(gistHtml)
+        $el=$(gistHtml)
         # special: promote markdown content
-        jel.find('article.markdown-body').each ->
+        $el.find('article.markdown-body').each ->
           inlineCss this, rrmd.cssRules
           inlineCss this, gistCssRules # necessary: for code highlighting
-          JQ(this).parentsUntil('div.gist').last().replaceWith(this)
+          $(this).parentsUntil('div.gist').last().replaceWith(this)
           null
         # special: prevent accident wrapping of scrolled content
-        jel.find('.gist-data').each ->
+        $el.find('.gist-data').each ->
           @style.whiteSpace||='nowrap'
-        el=spanifyAll inlineCss jel.wrapAll('<span />').parent()[0], @cssRules
+        el=spanifyAll inlineCss $el.wrapAll('<span />').parent()[0], @cssRules
         cb null, @saved[id]=el
 
   conv: (cb)->
@@ -349,7 +348,7 @@ W.rrmd=rrmd=
         await @gistManager.get id, defer(err, gist)
         if err?
           cb err; throw err
-        JQ(a).replaceWith(gist)
+        $(a).replaceWith(gist)
         @ui.setStatus(null, null, 0.01+0.99*(i+1)/n)
 
     if @options.emoticonQ
@@ -387,7 +386,7 @@ W.rrmd=rrmd=
 
 checkPageReady=(cb)->
   tid=setInterval (->
-    if W.tinymce?.editors?[0]?
+    if rrmdEnv.window.tinymce?.editors?[0]?
       clearInterval(tid)
       cb()
   ), 1000
