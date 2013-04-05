@@ -58,6 +58,11 @@ Userscript: `dist/gm`
 (before v0.4.34: not kept)
 
 
+**2013-04-05 : v0.5.5**
+
+* workaround: firefox update broke compatibility
+
+
 **2013-03-28 : v0.5.4**
 
 * workaround renren blog site update
