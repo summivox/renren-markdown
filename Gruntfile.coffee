@@ -104,6 +104,7 @@ module.exports = (grunt) ->
         files:
           'build/lib/marked.min.js': ['lib/marked.js']
           'build/lib/specificity.min.js': ['lib/specificity.js']
+          'build/lib/html2canvas.min.js': ['lib/html2canvas.js']
 
     cssmin:
       markdown:
@@ -122,6 +123,7 @@ module.exports = (grunt) ->
           'lib/jquery-1.8.2.min.js'
           'build/lib/marked.min.js'
           'build/lib/specificity.min.js'
+          'build/lib/html2canvas.min.js'
         ]
         dest: 'build/lib.js'
       main: # common code (without compatibility layer)
