@@ -39,9 +39,14 @@ $ ->
     d.html m
     MathJax.Hub.Typeset d[0], ->
       console.log 'done'
+      # $('span.math').parent().css('position', 'fixed').css('left', '-1000px')
       $('span.math').each ->
-        @style.width=''
+        # @parentElement.style.position = 'fixed'
         html2canvas [@], onrendered: (x) ->
-          s = x.toDataURL()
-          console.log 'image: ' + s.length
+          console.log '--image--'
+          #s = x.toDataURL('image/jpeg', 0.3)
+          #console.log 'jpeg: ' + s.length
+          #console.log s
+          s = x.toDataURL('image/png')
+          console.log 'png: ' + s.length
           console.log s

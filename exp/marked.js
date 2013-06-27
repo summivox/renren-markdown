@@ -195,7 +195,6 @@ Lexer.prototype.token = function(src, top) {
 
     // math
     if (cap = this.rules.math.exec(src)) {
-      console.log(cap); //DEBUG
       src = src.substring(cap[0].length);
       this.tokens.push({
         type: 'math',
@@ -682,7 +681,6 @@ InlineLexer.prototype.output = function(src) {
 
     // math
     if (cap = this.rules.math.exec(src)) {
-      console.log(cap); //DEBUG
       src = src.substring(cap[0].length);
       out += '<script type="math/tex">'
         + cap[1] //FIXME: filter <script> & </script>

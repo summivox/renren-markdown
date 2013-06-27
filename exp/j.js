@@ -38,11 +38,11 @@
       return MathJax.Hub.Typeset(d[0], function() {
         console.log('done');
         return $('span.math').each(function() {
-          this.style.width = '';
           return html2canvas([this], {
             onrendered: function(x) {
-              s = x.toDataURL();
-              console.log('image: ' + s.length);
+              console.log('--image--');
+              s = x.toDataURL('image/png');
+              console.log('png: ' + s.length);
               return console.log(s);
             }
           });
