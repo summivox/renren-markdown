@@ -221,7 +221,7 @@ unembed=(h)->
 
 rrmdEnv.window.rrmd=rrmd=
   $: # for console access
-    {$, marked, SPECIFICITY, b64_to_str, str_to_b64, html2canvas}
+    {$, marked, SPECIFICITY, b64_to_str, str_to_b64, html2canvas, xhr: (details) -> rrmdEnv.xhr(details)}
 
   options:
     delay: 400
