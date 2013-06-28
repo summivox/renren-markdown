@@ -14,16 +14,8 @@ window.rrmdEnv =
   xhr: (details)->
     if !details?.url? then return
     seq = ++@_xhrSeq
-    @window.addEventListener "message", (handler = (e) ->
-      res = e?.data
-      if res?._xhr_cb == seq
-        console.log 'xhr cb at down'
-        console.log res
-
-        @window.removeEventListener "message", handler, false
-        details[res.f]? res.arg
-        return
-    ), false
+    
+    # xhr arguments
     {
       method
       url
@@ -35,14 +27,17 @@ window.rrmdEnv =
     } = details
     o = {
       _xhr: seq
-      data
-      headers
       method
+      url
+      headers
+      data
       overrideMimeType
       password
-      url
       user
     }
+
+    # xhr callbacks: indicate existence only
+    # reason: functions can't be passed through `window.postMessage`
     [
       'onreadystatechange'
       'onabort'
@@ -53,7 +48,12 @@ window.rrmdEnv =
       'onprogress'
     ].map (f) -> o[f] = details[f]?
 
-    console.log 'xhr at down' #debug
-    console.log o #debug
-
+    # listen and forward callbacks
+    @window.addEventListener "message", (handler = (e) ->
+      res = e?.data
+      if res?._xhr_cb == seq
+        @window.removeEventListener "message", handler, false
+        details[res.f]? res.arg
+        return
+    ), false
     @window.postMessage o, "*"

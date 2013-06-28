@@ -1,5 +1,9 @@
-# Copyright (c) 2013, xiaoyao9933 (MIT Licensed)
-# Inject the renren-markdown js into web and listen the event.
+# Copyright (c) 2013, smilekzs, xiaoyao9933 (MIT Licensed)
+# compatibility layer: chrome plugin
+
+# This operates in the "content script" domain, with free XHR access
+# but fake `window`. Main script is injected into a <script> tag in
+# the target page then run. See `env.iced` for details.
 
 inject = (name) ->
   s = document.createElement 'script'
@@ -8,22 +12,19 @@ inject = (name) ->
 
 checkPageReady = (cb) ->
   tid=setInterval (->
-    if window.frames?[0]?
+    if document?.body?
       clearInterval(tid)
       cb()
   ), 250
-
 await checkPageReady defer()
 
 inject 'renren-markdown.chrome.js'
 
+# XHR bridge
 window.addEventListener "message", (handler = (e) ->
   if e.origin != "http://blog.renren.com" then return
   o = e.data
   if o?._xhr?
-    console.log 'xhr at up'
-    console.log o
-
     xhr = new XMLHttpRequest()
     [
       'onreadystatechange'
