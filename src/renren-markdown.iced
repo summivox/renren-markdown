@@ -99,11 +99,11 @@ spanifyAll=(el)->
 
   # clone `el` into raw span element
   # also prevent elements with no text from being stripped
-  spanify=(el, cssText='')->
+  spanify=(el)->
     if !el? then return $('<span />')
     s=escapeCssText el.style.cssText
     cont=el.innerHTML.trim() || '<span style="display: none;">&nbsp;</span>'
-    $("""<span style="#{s};#{cssText}">#{cont}</span>""")
+    $("""<span style="#{s}">#{cont}</span>""")
 
   # preformatted text: replace with `&amp;` and friends
   $el.find('pre').each ->
