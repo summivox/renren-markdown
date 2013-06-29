@@ -1,37 +1,35 @@
-{
-  "name": "renren-markdown",
-  "description": "Markdown and Gist support for http://blog.renren.com/",
-  "version": "0.5.5",
-  "homepage": "https://github.com/smilekzs/renren-markdown",
-  "author": {
-    "name": "smilekzs"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/smilekzs/renren-markdown.git"
-  },
-  "bugs": {
-    "url": "https://github.com/smilekzs/renren-markdown/issues"
-  },
-  "licenses": [
-    {
-      "type": "MIT"
+{"name": "renren-markdown"
+,"description": "Markdown and Gist support for http://blog.renren.com/"
+,"version": "0.5.5"
+,"homepage": "https://github.com/smilekzs/renren-markdown"
+,"author":
+  {"name": "smilekzs"
+  }
+,"repository":
+  {"type": "git"
+  ,"url": "git://github.com/smilekzs/renren-markdown.git"
+  }
+,"bugs":
+  {"url": "https://github.com/smilekzs/renren-markdown/issues"
+  }
+,"licenses":
+  [ {"type": "MIT"
     }
-  ],
-  "main": "Gruntfile.js",
-  "engines": {
-    "node": ">= 0.8.0"
-  },
-  "scripts": {
-  },
-  "devDependencies": {
-    "iced-coffee-script": "~1.4.0",
-    "grunt-contrib-copy": "~0.4.0",
-    "grunt-contrib-concat": "~0.1.3",
-    "grunt-contrib-watch": "~0.2.0",
-    "grunt-contrib-clean": "~0.4.0",
-    "grunt-contrib-uglify": "~0.1.2",
-    "grunt-contrib-cssmin": "~0.4.2",
-    "grunt": "~0.4.1"
+  ]
+,"main": "Gruntfile.js"
+,"engines":
+  {"node": ">= 0.8.0"
+  }
+,"scripts": {}
+,"devDependencies":
+  {"grunt": "~0.4.1"
+  ,"iced-coffee-script": "~1.6.0"
+  ,"grunt-iced-coffee": "~0.7.0"
+  ,"grunt-contrib-copy": "~0.4.0"
+  ,"grunt-contrib-concat": "~0.1.3"
+  ,"grunt-contrib-watch": "~0.2.0"
+  ,"grunt-contrib-clean": "~0.4.0"
+  ,"grunt-contrib-uglify": "~0.1.2"
+  ,"grunt-contrib-cssmin": "~0.4.2"
   }
 }

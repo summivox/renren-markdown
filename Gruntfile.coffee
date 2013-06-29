@@ -5,48 +5,12 @@ module.exports = (grunt) ->
   ############
   # plugins
 
+  grunt.loadNpmTasks 'grunt-iced-coffee'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
   grunt.loadNpmTasks 'grunt-contrib-cssmin'
-
-
-  ############
-  # iced-coffee-script
-
-  grunt.registerMultiTask 'iced', 'Compile IcedCoffeeScript files into JavaScript', ->
-    path = require('path')
-    options = @options(
-      bare: false
-      separator: grunt.util.linefeed
-    )
-    grunt.fail.warn 'Experimental destination wildcards are no longer supported. please refer to README.'   if options.basePath or options.flatten
-    grunt.verbose.writeflags options, 'Options'
-    @files.forEach (f) ->
-      output = f.src.filter((filepath) ->
-        if grunt.file.exists(filepath)
-          true
-        else
-          grunt.log.warn 'Source file \'' + filepath + '\' not found.'
-          false
-      ).map((filepath) ->
-        compileCoffee filepath, options
-      ).join(grunt.util.normalizelf(options.separator))
-      if output.length < 1
-        grunt.log.warn 'Destination not written because compiled files were empty.'
-      else
-        grunt.file.write f.dest, output
-        grunt.log.writeln 'File ' + f.dest + ' created.'
-
-  compileCoffee = (srcFile, options) ->
-    options = grunt.util._.extend filename: srcFile, options
-    srcCode = grunt.file.read srcFile
-    try
-      return require('iced-coffee-script').compile srcCode, options
-    catch e
-      grunt.log.error e
-      grunt.fail.warn 'CoffeeScript failed to compile.'
 
 
   ############
@@ -91,15 +55,16 @@ module.exports = (grunt) ->
   grunt.initConfig
     pkg: grunt.file.readJSON('package.json')
 
-    iced:
+    coffee: # actually grunt-iced-coffee
       all:
         options:
+          bare: true
           runtime: 'inline'
         files: [
           {
             expand: true
             cwd: 'src'
-            src: ['**/*.iced']
+            src: ['**/*.{iced,coffee}']
             dest: 'build/iced'
             ext: '.js'
           }
@@ -184,7 +149,7 @@ module.exports = (grunt) ->
 
     clean:
       build: ['build/*']
-      release: ['dist/*']
+      dist: ['dist/*']
 
 
   grunt.registerTask 'lib', [
@@ -203,7 +168,7 @@ module.exports = (grunt) ->
   ]
 
   grunt.registerTask 'compile', [
-    'iced:all'
+    'coffee:all'
     'concat:main'
   ]
 
