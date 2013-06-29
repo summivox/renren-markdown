@@ -47,16 +47,22 @@ module.exports = (grunt) ->
     pkg: grunt.file.readJSON('package.json')
 
     coffee: # actually grunt-iced-coffee
-      all:
+      options:
+        bare: true
+        runtime: 'inline'
+      main:
         options:
-          bare: true
-          runtime: 'inline'
+          join: true
+        files: [
+          {src: 'src/*.{iced,coffee}', dest: 'build/main.js'}
+        ]
+      other:
         files: [
           {
             expand: true
-            cwd: 'src'
-            src: '**/*.{iced,coffee}'
-            dest: 'build/iced'
+            cwd: 'src/'
+            src: '*/**/*.{iced,coffee}'
+            dest: 'build/'
             ext: '.js'
           }
         ]
@@ -69,7 +75,7 @@ module.exports = (grunt) ->
           {
             expand: true
             cwd: 'lib/'
-            src: ['*.js']
+            src: '*.js'
             dest: 'build/lib/'
             ext: '.min.js'
           }
@@ -151,7 +157,6 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'css', [
     'cssmin:markdown'
-    'css2js:markdown'
   ]
 
   grunt.registerTask 'prepare', [
@@ -160,7 +165,7 @@ module.exports = (grunt) ->
   ]
 
   grunt.registerTask 'compile', [
-    'coffee:all'
+    'coffee:main'
     'concat:main'
   ]
 
