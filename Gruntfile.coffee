@@ -14,14 +14,9 @@ module.exports = (grunt) ->
 
 
   ############
-  # css2js
+  # text files -> JSON
 
-  grunt.registerMultiTask 'css2js', 'wrap css into js', ->
-    css=grunt.file.read(@data.src, encoding: 'utf-8')
-    js=";var #{@data.name}=#{JSON.stringify(css)};\n"
-    grunt.file.write(@data.dest, js, encoding: 'utf-8')
-
-  grunt.registerMultiTask 'pack', 'pack text files into JSON', ->
+  grunt.registerMultiTask 'pack', 'pack text files into JSONP', ->
     path = require 'path'
     for x in @files
       o = {}
@@ -29,24 +24,20 @@ module.exports = (grunt) ->
         name = path.basename f
         cont = grunt.file.read f, encoding: 'utf-8'
         o[name] = cont
-      grunt.file.write x.dest, JSON.stringify(o), encoding: 'utf-8'
+      ret = ";var #{x.name}=#{JSON.stringify(o)};\n"
+      grunt.file.write x.dest, ret, encoding: 'utf-8'
+
 
   ############
   # template
 
   grunt.registerMultiTask 'template', ->
-    for file in @files
-      src=file.src[0]
-      dest=file.dest
-      cont=grunt.template.process grunt.file.read(src, encoding: 'utf-8')
-      cont=cont.replace(/\r\n/g, '\n')
+    for x in @files
+      src = x.src[0]
+      dest = x.dest
+      cont = grunt.template.process grunt.file.read(src, encoding: 'utf-8')
+      cont = cont.replace(/\r\n/g, '\n')
       grunt.file.write(dest, cont, encoding: 'utf-8')
-
-
-  ############
-  # setenv
-  grunt.registerMultiTask 'setenv', ->
-    grunt.config.set 'window', @data
 
 
   ############
@@ -64,7 +55,7 @@ module.exports = (grunt) ->
           {
             expand: true
             cwd: 'src'
-            src: ['**/*.{iced,coffee}']
+            src: '**/*.{iced,coffee}'
             dest: 'build/iced'
             ext: '.js'
           }
@@ -86,32 +77,33 @@ module.exports = (grunt) ->
 
     cssmin:
       markdown:
-        files:
-          'build/markdown.min.css': ['src/markdown.css']
-
-    css2js:
-      markdown:
-        name: 'MARKDOWN_CSS'
-        src: 'build/markdown.min.css'
-        dest: 'build/markdown.min.css.js'
-
-    pack:
-      test:
         files: [
           {
-            src: 'src/chrome/*'
-            dest: 'build/pack.js'
+            expand: true
+            cwd: 'src/'
+            src: '*.css'
+            dest: 'build/css/'
+            ext: '.min.css'
           }
         ]
+
+    pack:
+      css:
+        name: 'PACKED_CSS'
+        src: 'build/css/*.css'
+        dest: 'build/packed/css.js'
 
     concat:
       lib: # all minified libraries
         src: 'build/lib/*.js'
         dest: 'build/lib.js'
+      pack: # all packed text files
+        src: 'build/packed/*.js'
+        dest: 'build/packed.js'
       main: # common code (without compatibility layer)
         src: [
           'build/lib.js'
-          'build/markdown.min.css.js'
+          'build/packed.js'
           'src/emoticon.js' # TODO: auto emoticon.js
           'build/iced/renren-markdown.js'
         ]
@@ -134,7 +126,7 @@ module.exports = (grunt) ->
       chrome:
         files: [
           {src: 'build/iced/chrome/inject.js', dest: 'dist/chrome/js/inject.js'}
-          {src: 'assets/icon.png', dest: 'dist/chrome/img/icon.png'}
+          {src: 'images/icon.png', dest: 'dist/chrome/img/icon.png'}
         ]
 
     template: # for metadata
