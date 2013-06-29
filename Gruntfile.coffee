@@ -54,10 +54,18 @@ module.exports = (grunt) ->
 
   grunt.registerMultiTask 'css2js', 'wrap css into js', ->
     css=grunt.file.read(@data.src, encoding: 'utf-8')
-    css=css.replace(/\'/g, '\\\'').replace(/[\n\r\v]/g, ' ')
-    js=";var #{@data.name}='#{css}';\n"
+    js=";var #{@data.name}=#{JSON.stringify(css)};\n"
     grunt.file.write(@data.dest, js, encoding: 'utf-8')
 
+  grunt.registerMultiTask 'pack', 'pack text files into JSON', ->
+    path = require 'path'
+    for x in @files
+      o = {}
+      for f in x.src
+        name = path.basename f
+        cont = grunt.file.read f, encoding: 'utf-8'
+        o[name] = cont
+      grunt.file.write x.dest, JSON.stringify(o), encoding: 'utf-8'
 
   ############
   # template
@@ -101,10 +109,15 @@ module.exports = (grunt) ->
       options:
         preserveComments: 'some'
       lib:
-        files:
-          'build/lib/marked.min.js': ['lib/marked.js']
-          'build/lib/specificity.min.js': ['lib/specificity.js']
-          'build/lib/html2canvas.min.js': ['lib/html2canvas.js']
+        files: [
+          {
+            expand: true
+            cwd: 'lib/'
+            src: ['*.js']
+            dest: 'build/lib/'
+            ext: '.min.js'
+          }
+        ]
 
     cssmin:
       markdown:
@@ -117,14 +130,18 @@ module.exports = (grunt) ->
         src: 'build/markdown.min.css'
         dest: 'build/markdown.min.css.js'
 
+    pack:
+      test:
+        files: [
+          {
+            src: 'src/chrome/*'
+            dest: 'build/pack.js'
+          }
+        ]
+
     concat:
       lib: # all minified libraries
-        src: [
-          'lib/jquery-1.8.2.min.js'
-          'build/lib/marked.min.js'
-          'build/lib/specificity.min.js'
-          'build/lib/html2canvas.min.js'
-        ]
+        src: 'build/lib/*.js'
         dest: 'build/lib.js'
       main: # common code (without compatibility layer)
         src: [
