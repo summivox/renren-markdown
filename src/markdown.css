@@ -4,7 +4,7 @@ pre {
     overflow: auto;
 }
 
-code{
+code {
     white-space: nowrap;
     border: 1px solid #EAEAEA;
     background-color: #F8F8F8;
@@ -58,7 +58,7 @@ blockquote, q {
     quotes: none;
 }
 
-blockquote::before,  blockquote::after,  q::before,  q::after {
+blockquote::before, blockquote::after, q::before, q::after {
     content: none;
 }
 
