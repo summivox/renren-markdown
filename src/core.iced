@@ -19,9 +19,6 @@ core.getCssRules = do ->
       cb? util.arrayize doc.styleSheets[0].cssRules
     return
 
-# convert double quotes in cssText to avoid single-double-quote hell
-core.escapeCssText = (cssText) -> cssText.replace /"/g, "'"
-
 core.inlineCss = do ->
   # specificity comparison
   cmp = (a, b) ->
@@ -142,10 +139,10 @@ core.spanify = do ->
         return
       )(arg...)
       return # forEach (arg)
-    
+
     # style on <a> is pruned, so restore by wrapping
     $el.find('a').each ->
-      cssText = core.escapeCssText @style.cssText
+      cssText = util.dq2sq @style.cssText # same as above
       @style.cssText = ''
       $(this).wrap("""<span style="#{cssText}" />""")
 
