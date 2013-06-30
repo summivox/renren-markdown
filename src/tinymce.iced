@@ -1,6 +1,6 @@
 ###!
 tinymce
-###
+!###
 
 tinymce = {}
 
@@ -29,7 +29,7 @@ tinymce.init = ->
   util.injectScript ->
     ###!
     rrmd.tinymce (injected)
-    ###
+    !###
 
     # bootstrap
     editor = null

@@ -1,6 +1,6 @@
 ###!
 xhr
-###
+!###
 
 if !window.GM_xmlHttpRequest?
   if chrome?.extensions?
