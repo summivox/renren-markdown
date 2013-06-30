@@ -30,7 +30,7 @@ if !window.GM_xmlHttpRequest?
               status
               statusText
             } = progress.target
-            o[f]? {
+            o[f] {
               lengthComputable
               loaded
               total
@@ -43,5 +43,5 @@ if !window.GM_xmlHttpRequest?
       xhr.open o.method, o.url, true, o.user, o.password
       xhr.send o.data
   else
-    GM_xmlHttpRequest = ->
+    window.GM_xmlHttpRequest = ->
       throw new Error 'GM_xmlHttpRequest missing'
