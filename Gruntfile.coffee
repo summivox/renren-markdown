@@ -33,7 +33,7 @@ module.exports = (grunt) ->
 
   grunt.registerMultiTask 'template', ->
     for x in @files
-      src = x.src[0]
+      src = x.src[0] # FIXME: support one src only
       dest = x.dest
       cont = grunt.template.process grunt.file.read(src, encoding: 'utf-8')
       cont = cont.replace(/\r\n/g, '\n')
@@ -138,11 +138,11 @@ module.exports = (grunt) ->
     template: # for metadata
       chrome:
         files: [
-          {src: 'src/chrome/manifest.json', dest: 'dist/chrome/manifest.json'}
+          {src: 'manifest.json', dest: 'dist/chrome/manifest.json'}
         ]
       gm:
         files: [
-          {src: 'src/gm/metadata.js', dest: 'build/metadata.js'}
+          {src: 'metadata.js', dest: 'build/metadata.js'}
         ]
 
     clean:
@@ -157,6 +157,7 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'css', [
     'cssmin:markdown'
+    'pack:css'
   ]
 
   grunt.registerTask 'prepare', [
@@ -166,7 +167,7 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'compile', [
     'coffee:main'
-    'concat:main'
+    #'concat:main'
   ]
 
   grunt.registerTask 'chrome', [
@@ -182,6 +183,6 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'default', [
     'compile'
-    'chrome'
-    'gm'
+    #'chrome'
+    #'gm'
   ]

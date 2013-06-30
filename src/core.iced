@@ -100,7 +100,7 @@ core.spanify = do ->
           .replace(/\&/g, '&amp;')
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;')
-          .replace(/\t/g, '        ') # FIXME: tab stop hardcoded to 8
+          .replace(/\t/g, '        ') # tab stop hardcoded to 8
           .replace(/\ /g, '&nbsp;')
           .replace(/(?!^)[\n\r]/g, '<br/>') # NOTE: initial \n does not count
         $(t).replaceWith("<span>#{cont}</span>")
@@ -132,7 +132,7 @@ core.spanify = do ->
       ['table', 'table']
     ].forEach (arg) ->
       ((sel, disp) ->
-        while (x = $el.find(sel)[0])
+        while (x = el.querySelector sel) # $el.find(sel)[0])
           s = getSpan x
           s.style.display ||= disp
           $(x).replaceWith(s)
