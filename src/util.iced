@@ -7,9 +7,13 @@ util = {}
 # array-like => array, else []
 util.arrayize = (a) -> if a?.length then [].slice.call(a) else []
 
-# convert single quotes <=> double quotes
-util.sq2dq = (s) -> s.replace /'/g, '"'
-util.dq2sq = (s) -> s.replace /"/g, "'"
+# single quotes <=> double quotes
+util.squote_to_dquote = (s) -> s.replace /'/g, '"'
+util.dquote_to_squote = (s) -> s.replace /"/g, "'"
+
+# string <=> base64
+util.str_to_b64 = (str) -> window.btoa unescape encodeURIComponent str
+util.b64_to_str = (b64) -> decodeURIComponent escape window.atob b64
 
 # add script tag to document
 #   script => run

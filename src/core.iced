@@ -105,7 +105,7 @@ core.spanify = do ->
           .replace(/(?!^)[\n\r]/g, '<br/>') # NOTE: initial \n does not count
         $(t).replaceWith("<span>#{cont}</span>")
 
-    cssText = util.dq2sq el.style.cssText # prevent single-double-quote hell
+    cssText = util.dquote_to_squote el.style.cssText # prevent single-double-quote hell
     cont = el.innerHTML.trim() || dummy
     ret.style.cssText = cssText
     ret.innerHTML = cont
@@ -142,7 +142,7 @@ core.spanify = do ->
 
     # style on <a> is pruned, so restore by wrapping
     $el.find('a').each ->
-      cssText = util.dq2sq @style.cssText # same as above
+      cssText = util.dquote_to_squote @style.cssText # same as above
       @style.cssText = ''
       $(this).wrap("""<span style="#{cssText}" />""")
 
