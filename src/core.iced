@@ -4,71 +4,66 @@ core
 
 core = {}
 
-# get css rules from css source
-# FIXME: use template engine
-core.getCssRules = do ->
-  n = 0
-  ifr = -> 
-    """<iframe
-      id="rrmd_iframe_#{n++}"
-      style="position:fixed; left: -10px; width: 1px; height: 1px;"
-    />"""
-  getCssRules = (css, cb) ->
-    doc = $(ifr()).appendTo('body')[0].contentDocument
+# get augmented css rules from css source
+# "augmented":
+#   comma-separated selectors with same body => multiple rules
+#   rules (stably) sorted by specificity (from high to low)
+core.getAugCssRules = do ->
+  # augment css rules
+  aug = (rules) ->
+    ret = []
+    idx = 0
+    rules.forEach (r) ->
+      for {selector, specificity} in getSpecificity r.selectorText
+        idx = ret.push {
+          selectorText: selector
+          style: r.style
+          specificity
+          idx
+        }
+      return # forEach
+    ret.sort (a, b) ->
+      for i in [0..2]
+        if (c = b.specificity[i] - a.specificity[i])
+          return c
+      return a.idx - b.idx # stable sort
+
+  # use iframe to get original css rules
+  iframe = do ->
+    n = 0
+    iframe = -> 
+      """<iframe
+        id="rrmd_iframe_#{n++}"
+        style="position:fixed; left: -10px; width: 1px; height: 1px;"
+      />"""
+
+  getAugCssRules = (css, cb) ->
+    doc = $(iframe()).appendTo('body')[0].contentDocument
     $(doc).ready ->
       doc.write """<style type="text/css">#{css}</style>"""
-      cb? util.arrayize doc.styleSheets[0].cssRules
-    return
+      cb? aug util.arrayize doc.styleSheets[0].cssRules
 
 core.inlineCss = do ->
-  # specificity comparison
-  cmp = (a, b) ->
-    switch
-      when a<b then -1
-      when a>b then +1
-      else 0
-  cmpSpec = (a, b) ->
-    for i in [0, 1, 2]
-      if (c = cmp a[i], b[i])
-        return c
-    return 0
-
-  # workaround: non-standard properties
+  # workaround: non-standard entries
   valid = (s) -> s && s[0] != '-'
   prune = (s) ->
     if (m = s.match /^(.*)-value$/) && s != 'drop-initial-value'
       return m[1]
     return s
 
-  # comma-separated selectors => multiple rules with same body
-  expandRules = (rules) ->
-    ret = []
-    rules.forEach (r) ->
-      for {selector, specificity} in getSpecificity r.selectorText
-        ret.push {
-          selector
-          specificity
-          style: r.style
-        }
-    ret
-
   inlineCss = (rootEl, rules) ->
-    expandRules(rules)
-      .sort (a, b) ->
-        cmpSpec a.specificity, b.specificity
-      .reverse()
-      .forEach (r) ->
-        {selector: sel, style} = r
-        util.arrayize(rootEl.querySelectorAll(sel)).forEach (el) ->
-          for key in style
-            if !valid(key) then continue
-            key = prune(key)
-            value = style.getPropertyValue(key).trim()
-            if !valid(value) then continue
-            orig = el.style.getPropertyValue(key)
-            if !orig then el.style.setProperty(key, value, '')
-          return # forEach (el)
-        return # forEach (r)
+    rules.forEach (r) ->
+      {selectorText: sel, style} = r
+      util.arrayize(rootEl.querySelectorAll(sel)).forEach (el) ->
+        for key in style
+          if !valid(key) then continue
+          key = prune(key)
+          value = style.getPropertyValue(key).trim()
+          if !valid(value) then continue
+          orig = el.style.getPropertyValue(key)
+          if !orig then el.style.setProperty(key, value, '')
+        return # forEach (el)
+      return # forEach (r)
     return rootEl # inlineCss
 
 # convert almost every element within a container into <span>
@@ -77,7 +72,7 @@ core.spanify = do ->
   # prevent element with empty innerHTML from being stripped
   dummy = '<span style="display: none;">&nbsp;</span>'
 
-  getTextNodes = (el) ->
+  getTextNodes = (rootEl) ->
     ret = []
     find = (node) ->
       if node.nodeType == 3
@@ -86,7 +81,7 @@ core.spanify = do ->
         for n in node.childNodes
           find n
       return
-    find el
+    find rootEl
     ret
 
   # single element => span
@@ -97,14 +92,15 @@ core.spanify = do ->
     # special: <pre>-formatting
     if el.tagName == 'PRE'
       for t in getTextNodes el
-        cont = t.data.toString()
+        t2 = document.createElement 'span'
+        t2.innerHTML = t.data.toString()
           .replace(/\&/g, '&amp;')
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;')
           .replace(/\t/g, '        ') # tab stop hardcoded to 8
           .replace(/\ /g, '&nbsp;')
           .replace(/(?!^)[\n\r]/g, '<br/>') # NOTE: initial \n does not count
-        $(t).replaceWith("<span>#{cont}</span>")
+        $(t).replaceWith(t2)
 
     cssText = util.dquote_to_squote el.style.cssText # prevent single-double-quote hell
     cont = el.innerHTML.trim() || dummy
@@ -112,12 +108,12 @@ core.spanify = do ->
     ret.innerHTML = cont
     ret # getSpan
 
-  spanify = (el) ->
-    if !el? then return
-    $el = $(el)
+  spanify = (rootEl) ->
+    if !rootEl? then return
+    $rootEl = $(rootEl)
 
     # workaround firefox non-standard text-decoration impl
-    $el.find('s, del').each ->
+    $rootEl.find('s, del').each ->
       @style.textDecoration = 'line-through'
 
     # elem => span with "display: xxx"
@@ -133,7 +129,7 @@ core.spanify = do ->
       ['table', 'table']
     ].forEach (arg) ->
       ((sel, disp) ->
-        while (x = el.querySelector sel) # $el.find(sel)[0])
+        while (x = rootEl.querySelector sel) # $el.find(sel)[0])
           s = getSpan x
           s.style.display ||= disp
           $(x).replaceWith(s)
@@ -142,9 +138,9 @@ core.spanify = do ->
       return # forEach (arg)
 
     # style on <a> is pruned, so restore by wrapping
-    $el.find('a').each ->
+    $rootEl.find('a').each ->
       cssText = util.dquote_to_squote @style.cssText # same as above
       @style.cssText = ''
       $(this).wrap("""<span style="#{cssText}" />""")
 
-    return el
+    return rootEl # spanify
