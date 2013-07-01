@@ -8,10 +8,11 @@ core = {}
 # FIXME: use template engine
 core.getCssRules = do ->
   n = 0
-  ifr = -> """<iframe
-    id="rrmd_iframe_#{n++}"
-    style="position:fixed; left: -10px; width: 1px; height: 1px;"
-  />"""
+  ifr = -> 
+    """<iframe
+      id="rrmd_iframe_#{n++}"
+      style="position:fixed; left: -10px; width: 1px; height: 1px;"
+    />"""
   getCssRules = (css, cb) ->
     doc = $(ifr()).appendTo('body')[0].contentDocument
     $(doc).ready ->
