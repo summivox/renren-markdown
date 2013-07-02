@@ -19,7 +19,7 @@ pre, code {
     font-family: Consolas, Inconsolata, Courier, monospace;
 }
 
-pre code, div.highlight {
+pre code/*, div.highlight*/ {
     border-radius: 3px;
     border: 1px solid #CCC;
     background-color: #F8F8F8;
@@ -58,20 +58,20 @@ blockquote, q {
     quotes: none;
 }
 
-blockquote::before, blockquote::after, q::before, q::after {
+/*blockquote::before, blockquote::after, q::before, q::after {
     content: none;
-}
+}*/
 
-a: link, a: visited {
+/*a:link, a:visited {
     color: #33e;
     text-decoration: none;
 }
 
-a: hover {
+a:hover {
     color: #00f;
     text-shadow: 1px 1px 2px #ccf;
     text-decoration: underline;
-}
+}*/
 
 h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
@@ -107,9 +107,9 @@ h6 {
     color: #777;
 }
 
-.shadow {
+/*.shadow {
     box-shadow: 0 5px 15px #000;
-}
+}*/
 
 table {
     border-collapse: collapse;

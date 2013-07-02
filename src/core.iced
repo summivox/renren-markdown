@@ -52,18 +52,17 @@ core.inlineCss = do ->
     return s
 
   inlineCss = (rootEl, rules) ->
-    rules.forEach (r) ->
+    for r in rules
       {selectorText: sel, style} = r
-      util.arrayize(rootEl.querySelectorAll(sel)).forEach (el) ->
+      for el in util.arrayize(rootEl.querySelectorAll(sel))
         for key in style
           if !valid(key) then continue
           key = prune(key)
+          orig = el.style.getPropertyValue(key)
+          if orig then continue
           value = style.getPropertyValue(key).trim()
           if !valid(value) then continue
-          orig = el.style.getPropertyValue(key)
-          if !orig then el.style.setProperty(key, value, '')
-        return # forEach (el)
-      return # forEach (r)
+          el.style.setProperty(key, value, '')
     return rootEl # inlineCss
 
 # convert almost every element within a container into <span>
@@ -108,16 +107,16 @@ core.spanify = do ->
     ret.innerHTML = cont
     ret # getSpan
 
+  # FIXME: switch to bottom-up tree traversal
   spanify = (rootEl) ->
     if !rootEl? then return
-    $rootEl = $(rootEl)
 
     # workaround firefox non-standard text-decoration impl
-    $rootEl.find('s, del').each ->
-      @style.textDecoration = 'line-through'
+    for el in rootEl.querySelectorAll 's, del'
+      el.style.textDecoration = 'line-through'
 
     # elem => span with "display: xxx"
-    [
+    for [sel, disp] in [
       ['pre, code', 'inline']
       ['s, del', 'inline']
       ['div, p, blockquote, q, article', 'block']
@@ -127,20 +126,16 @@ core.spanify = do ->
       ['tr', 'table-row']
       ['tbody, thead, tfoot', 'table-row-group']
       ['table', 'table']
-    ].forEach (arg) ->
-      ((sel, disp) ->
-        while (x = rootEl.querySelector sel) # $el.find(sel)[0])
-          s = getSpan x
-          s.style.display ||= disp
-          $(x).replaceWith(s)
-        return
-      )(arg...)
-      return # forEach (arg)
+    ]
+      while (x = rootEl.querySelector sel)
+        s = getSpan x
+        s.style.display ||= disp
+        $(x).replaceWith(s)
 
     # style on <a> is pruned, so restore by wrapping
-    $rootEl.find('a').each ->
-      cssText = util.dquote_to_squote @style.cssText # same as above
-      @style.cssText = ''
-      $(this).wrap("""<span style="#{cssText}" />""")
+    for el in rootEl.querySelector 'a'
+      cssText = util.dquote_to_squote el.style.cssText # same as above
+      el.style.cssText = ''
+      $(el).wrap("""<span style="#{cssText}" />""")
 
     return rootEl # spanify
