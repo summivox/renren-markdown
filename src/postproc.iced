@@ -10,14 +10,26 @@ postproc = new class extends Array
       sel
       handler
     }
+    # FIXME: plugin initialization? May need to really use classes.
   run: do ->
     tag = 'rrmd-pp'
     run = (rootEl) ->
+      ct = []
       for {sel, handler} in this
         $(sel).each ->
           unless tag in this.classList
             this.classList.add tag
-            if handler(this) == false
-              this.classList.remove tag
+            x = handler(this)
+            # FIXME: tag could be lost
+            switch
+              when x == false
+                this.classList.remove tag
+              when typeof(x) == 'function'
+                # continuity
+                ct.push {f: x, el: this}
+              else null
           return # each
-      return # run
+      return ->
+        for {f, el} in ct
+          f el
+        return

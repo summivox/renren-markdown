@@ -4,12 +4,18 @@ markdown
 
 # convert markdown source to DOM element with inline CSS
 markdown = (md) ->
-  if !markdown.inited then return null
+  markdown.render markdown.convert md
+
+markdown.convert = (md) ->
   el = document.createElement 'span'
   el.className = 'rrmd'
   el.innerHTML = marked md, @settings
-  core.inlineCss el, markdown.cssRules
   el
+
+markdown.render = (el) ->
+  if !markdown.inited then return null
+  return core.inlineCss el, markdown.cssRules
+
 
 # set default settings -- should be modifiable by persistence & UI
 markdown.settings = {
