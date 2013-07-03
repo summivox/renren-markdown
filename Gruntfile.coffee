@@ -106,27 +106,27 @@ module.exports = (grunt) ->
       pack: # all packed text files
         src: 'build/packed/*.js'
         dest: 'build/packed.js'
-      main: # common code (without compatibility layer)
-        src: [
-          'build/lib.js'
-          'build/packed.js'
-          'src/emoticon.js' # TODO: auto emoticon.js
-          'build/iced/renren-markdown.js'
-        ]
-        dest: 'build/renren-markdown.main.js'
-      chrome:
-        src: [
-          'build/iced/chrome/env.js'
-          'build/renren-markdown.main.js'
-        ]
-        dest: 'dist/chrome/js/renren-markdown.chrome.js'
-      gm:
-        src: [
-          'build/metadata.js'
-          'build/iced/gm/env.js'
-          'build/renren-markdown.main.js'
-        ]
-        dest: 'dist/gm/renren-markdown.user.js'
+      #main: # common code (without compatibility layer)
+        #src: [
+          #'build/lib.js'
+          #'build/packed.js'
+          #'src/emoticon.js' # TODO: auto emoticon.js
+          #'build/iced/renren-markdown.js'
+        #]
+        #dest: 'build/renren-markdown.main.js'
+      #chrome:
+        #src: [
+          #'build/iced/chrome/env.js'
+          #'build/renren-markdown.main.js'
+        #]
+        #dest: 'dist/chrome/js/renren-markdown.chrome.js'
+      #gm:
+        #src: [
+          #'build/metadata.js'
+          #'build/iced/gm/env.js'
+          #'build/renren-markdown.main.js'
+        #]
+        #dest: 'dist/gm/renren-markdown.user.js'
 
     copy:
       chrome:
@@ -138,11 +138,11 @@ module.exports = (grunt) ->
     template: # for metadata
       chrome:
         files: [
-          {src: 'manifest.json', dest: 'dist/chrome/manifest.json'}
+          {src: 'src/chrome/manifest.json', dest: 'dist/chrome/manifest.json'}
         ]
       gm:
         files: [
-          {src: 'metadata.js', dest: 'build/metadata.js'}
+          {src: 'src/gm/metadata.js', dest: 'build/metadata.js'}
         ]
 
     clean:
@@ -183,6 +183,7 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'default', [
     'compile'
+    'pack'
     #'chrome'
     #'gm'
   ]
