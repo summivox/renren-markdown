@@ -16,28 +16,24 @@ cron.init = ->
 
   cron.inited = true
 
-cron.start = ->
-  cron.mainId = setTimeout cron.mainHandler, cron.mainPeriod
-
-cron.stop = ->
-  if cron.mainId?
-    clearTimeout cron.mainId
-    cron.mainId = null
-
 cron.trig = ->
   cron.hasUpdate = true
   cron.heat++
+  if !cron.mainId then cron.mainId = setTimeout cron.mainHandler, cron.mainPeriod
 
 cron.mainHandler = do ->
-  n = n0 = 2
+  n = n0 = 10 # TODO: use heat to determine async timing instead
   mainHandler = ->
-    if cron.mainId then setTimeout cron.mainHandler, cron.mainPeriod
-    if cron.hasUpdate
-      cron.hasUpdate = false
-      n = n0
-      process.sync()
-    else if --n == 0
-      console.log 'cron.mainHandler: TODO: async'
+    if --n == 0
+      cron.mainId = null
+      console.log 'cron.mainHandler: TODO: async' # TODO
+    else
+      cron.mainId = setTimeout cron.mainHandler, cron.mainPeriod
+      if cron.hasUpdate
+        cron.hasUpdate = false
+        n = n0
+        process.sync()
+    return
 
 #cron.heatHandler = ->
   #cron.heat -= cron.heat >> 3

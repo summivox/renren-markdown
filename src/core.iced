@@ -7,7 +7,8 @@ core = {}
 # get augmented css rules from css source
 # "augmented":
 #   comma-separated selectors with same body => multiple rules
-#   rules (stably) sorted by specificity (from high to low)
+#   rules sorted by specificity (high -> low) then index (last -> first)
+#   (later rules don't override earlier rules unless `!important`)
 core.getAugCssRules = do ->
   # augment css rules
   aug = (rules) ->
@@ -26,7 +27,7 @@ core.getAugCssRules = do ->
       for i in [0..2]
         if (c = b.specificity[i] - a.specificity[i])
           return c
-      return a.idx - b.idx # stable sort
+      return b.idx - i.idx # stable sort
 
   # use iframe to get original css rules
   iframe = do ->
@@ -51,18 +52,28 @@ core.inlineCss = do ->
       return m[1]
     return s
 
+  read = (style, key) ->
+    val: style.getPropertyValue(key)?.trim()
+    pri: style.getPropertyPriority(key)?.trim()
+  canOverride = (curr, prev) ->
+    # prev.val | prev.pri | curr.pri
+    # 0          0          ?        => 1 (no old value => yes)
+    # 0          1          ?        => ? (invalid)
+    # 1          1          ?        => 0 (old important => no)
+    # 1          0          1        => 1 (old important, new important => yes)
+    valid(curr.val) && (!prev.val || (!prev.pri && curr.pri))
+
   inlineCss = (rootEl, rules) ->
     for r in rules
       {selectorText: sel, style} = r
-      for el in util.arrayize(rootEl.querySelectorAll(sel))
+      for el in util.arrayize rootEl.querySelectorAll sel
         for key in style
           if !valid(key) then continue
           key = prune(key)
-          orig = el.style.getPropertyValue(key)
-          if orig then continue
-          value = style.getPropertyValue(key).trim()
-          if !valid(value) then continue
-          el.style.setProperty(key, value, '')
+          curr = read(   style, key)
+          prev = read(el.style, key)
+          if canOverride(curr, prev)
+            el.style.setProperty(key, curr.val, curr.pri)
     return rootEl # inlineCss
 
 # convert almost every element within a container into <span>

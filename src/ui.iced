@@ -13,6 +13,9 @@ ui.init = ->
   ui.pDoc = ui.pFrame.contentDocument
   $(ui.pDoc).ready ->
     ui.pBody = ui.pDoc.body
+    ui.pStyleClear = ui.pDoc.createElement 'style'
+    ui.pStyleClear.textContent = PACKED_CSS['cssreset.css'] + '\n' + PACKED_CSS['cssbase.css']
+    ui.pDoc.head.appendChild ui.pStyleClear
     ui.pStyle = ui.pDoc.createElement 'style'
     ui.pDoc.head.appendChild ui.pStyle
     ui.inited = true

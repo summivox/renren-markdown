@@ -21,12 +21,17 @@ markdown.render = (el) ->
 markdown.settings = {
   gfm: true
   tables: true
-  breaks: true # really?
+  breaks: true # warning: backward incompatible
   smartLists: true
 }
 
+markdown.setCss = (cssText, cb) ->
+  markdown.cssText = cssText
+  core.getAugCssRules cssText, (cssRules) ->
+    markdown.cssRules = cssRules
+    cb?()
+
 markdown.inited = false
 markdown.init = ->
-  await
-    core.getAugCssRules PACKED_CSS['markdown.min.css'], defer(markdown.cssRules)
-  markdown.inited = true
+  markdown.setCss PACKED_CSS['markdown.css'], ->
+    markdown.inited = true

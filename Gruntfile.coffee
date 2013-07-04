@@ -43,7 +43,7 @@ module.exports = (grunt) ->
   ############
   # main config
 
-  grunt.initConfig
+  config =
     pkg: grunt.file.readJSON('package.json')
 
     coffee: # actually grunt-iced-coffee
@@ -86,10 +86,9 @@ module.exports = (grunt) ->
         files: [
           {
             expand: true
-            cwd: 'src/'
+            cwd: 'src/css/'
             src: '*.css'
             dest: 'build/css/'
-            ext: '.min.css'
           }
         ]
 
@@ -98,6 +97,10 @@ module.exports = (grunt) ->
         name: 'PACKED_CSS'
         src: 'build/css/*.css'
         dest: 'build/packed/css.js'
+      html:
+        name: 'PACKED_HTML'
+        src: 'src/html/*.html'
+        dest: 'build/packed/html.js'
 
     concat:
       lib: # all minified libraries
@@ -149,6 +152,7 @@ module.exports = (grunt) ->
       build: ['build/*']
       dist: ['dist/*']
 
+  grunt.initConfig config
 
   grunt.registerTask 'lib', [
     'uglify:lib'
@@ -184,6 +188,7 @@ module.exports = (grunt) ->
   grunt.registerTask 'default', [
     'compile'
     'pack'
+    'concat:pack'
     #'chrome'
     #'gm'
   ]

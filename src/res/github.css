@@ -1,0 +1,302 @@
+.rrmd {
+  font-size: 15px;
+  line-height: 1.7;
+  overflow: hidden;
+}
+
+.rrmd>:first-child {
+  margin-top: 0!important;
+}
+
+.rrmd>:last-child {
+  margin-bottom: 0!important;
+}
+
+.rrmd a.absent {
+  color: #c00;
+}
+
+.rrmd a.anchor {
+  display: block;
+  padding-left: 30px;
+  margin-left: -30px;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+}
+
+.rrmd h1, .rrmd h2, .rrmd h3, .rrmd h4, .rrmd h5, .rrmd h6 {
+  margin: 1em 0 15px;
+  padding: 0;
+  font-weight: bold;
+  line-height: 1.7;
+  cursor: text;
+  position: relative;
+}
+
+.rrmd h1 .octicon-link, .rrmd h2 .octicon-link, .rrmd h3 .octicon-link, .rrmd h4 .octicon-link, .rrmd h5 .octicon-link, .rrmd h6 .octicon-link {
+  display: none;
+  color: #000;
+}
+
+.rrmd h1:hover a.anchor, .rrmd h2:hover a.anchor, .rrmd h3:hover a.anchor, .rrmd h4:hover a.anchor, .rrmd h5:hover a.anchor, .rrmd h6:hover a.anchor {
+  text-decoration: none;
+  line-height: 1;
+  padding-left: 0;
+  margin-left: -22px;
+  top: 15%;
+}
+
+.rrmd h1:hover a.anchor .octicon-link, .rrmd h2:hover a.anchor .octicon-link, .rrmd h3:hover a.anchor .octicon-link, .rrmd h4:hover a.anchor .octicon-link, .rrmd h5:hover a.anchor .octicon-link, .rrmd h6:hover a.anchor .octicon-link {
+  display: inline-block;
+}
+
+.rrmd h1 tt, .rrmd h1 code, .rrmd h2 tt, .rrmd h2 code, .rrmd h3 tt, .rrmd h3 code, .rrmd h4 tt, .rrmd h4 code, .rrmd h5 tt, .rrmd h5 code, .rrmd h6 tt, .rrmd h6 code {
+  font-size: inherit;
+}
+
+.rrmd h1 {
+  font-size: 2.5em;
+  border-bottom: 1px solid #ddd;
+}
+
+.rrmd h2 {
+  font-size: 2em;
+  border-bottom: 1px solid #eee;
+}
+
+.rrmd h3 {
+  font-size: 1.5em;
+}
+
+.rrmd h4 {
+  font-size: 1.2em;
+}
+
+.rrmd h5 {
+  font-size: 1em;
+}
+
+.rrmd h6 {
+  color: #777;
+  font-size: 1em;
+}
+
+.rrmd p, .rrmd blockquote, .rrmd ul, .rrmd ol, .rrmd dl, .rrmd table, .rrmd pre {
+  margin: 15px 0;
+}
+
+.rrmd hr {
+  background: transparent url(/assets.github.com/assets/primer/markdown/dirty-shade-3d43d541b0f089487a139219bbf0309c6b1f2cd8.png) repeat-x 0 0;
+  border: 0 none;
+  color: #ccc;
+  height: 4px;
+  padding: 0;
+  margin: 15px 0;
+}
+
+.rrmd li p.first {
+  display: inline-block;
+}
+
+.rrmd ul, .rrmd ol {
+  padding-left: 30px;
+}
+
+.rrmd ul.no-list, .rrmd ol.no-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.rrmd ul ul, .rrmd ul ol, .rrmd ol ol, .rrmd ol ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.rrmd dl {
+  padding: 0;
+}
+
+.rrmd dl dt {
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
+  padding: 0;
+  margin-top: 15px;
+}
+
+.rrmd dl dd {
+  margin-bottom: 15px;
+  padding: 0 15px;
+}
+
+.rrmd blockquote {
+  border-left: 4px solid #DDD;
+  padding: 0 15px;
+  color: #777;
+}
+
+.rrmd blockquote>:first-child {
+  margin-top: 0;
+}
+
+.rrmd blockquote>:last-child {
+  margin-bottom: 0;
+}
+
+.rrmd table {
+  width: 100%;
+  overflow: auto;
+  display: block;
+}
+
+.rrmd table th {
+  font-weight: bold;
+}
+
+.rrmd table th, .rrmd table td {
+  border: 1px solid #ddd;
+  padding: 6px 13px;
+}
+
+.rrmd table tr {
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+.rrmd table tr: nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+.rrmd img {
+  max-width: 100%;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.rrmd span.frame {
+  display: block;
+  overflow: hidden;
+}
+
+.rrmd span.frame>span {
+  border: 1px solid #ddd;
+  display: block;
+  float: left;
+  overflow: hidden;
+  margin: 13px 0 0;
+  padding: 7px;
+  width: auto;
+}
+
+.rrmd span.frame span img {
+  display: block;
+  float: left;
+}
+
+.rrmd span.frame span span {
+  clear: both;
+  color: #333;
+  display: block;
+  padding: 5px 0 0;
+}
+
+.rrmd span.align-center {
+  display: block;
+  overflow: hidden;
+  clear: both;
+}
+
+.rrmd span.align-center>span {
+  display: block;
+  overflow: hidden;
+  margin: 13px auto 0;
+  text-align: center;
+}
+
+.rrmd span.align-center span img {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.rrmd span.align-right {
+  display: block;
+  overflow: hidden;
+  clear: both;
+}
+
+.rrmd span.align-right>span {
+  display: block;
+  overflow: hidden;
+  margin: 13px 0 0;
+  text-align: right;
+}
+
+.rrmd span.align-right span img {
+  margin: 0;
+  text-align: right;
+}
+
+.rrmd span.float-left {
+  display: block;
+  margin-right: 13px;
+  overflow: hidden;
+  float: left;
+}
+
+.rrmd span.float-left span {
+  margin: 13px 0 0;
+}
+
+.rrmd span.float-right {
+  display: block;
+  margin-left: 13px;
+  overflow: hidden;
+  float: right;
+}
+
+.rrmd span.float-right>span {
+  display: block;
+  overflow: hidden;
+  margin: 13px auto 0;
+  text-align: right;
+}
+
+.rrmd code, .rrmd tt {
+  margin: 0 2px;
+  padding: 0 5px;
+  border: 1px solid #ddd;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+.rrmd code {
+  white-space: nowrap;
+}
+
+.rrmd pre>code {
+  margin: 0;
+  padding: 0;
+  white-space: inherit;
+  border: none;
+  background: transparent;
+}
+
+.rrmd .highlight pre, .rrmd pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+
+.rrmd pre code, .rrmd pre tt {
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+}
