@@ -11,6 +11,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
   grunt.loadNpmTasks 'grunt-contrib-cssmin'
+  grunt.loadNpmTasks 'grunt-svgmin'
 
 
   ############
@@ -90,6 +91,12 @@ module.exports = (grunt) ->
             src: '*.css'
             dest: 'build/css/'
           }
+        ]
+
+    svgmin:
+      rrmd:
+        files: [
+          {src: 'images/rrmd.svg', dest: 'build/images/rrmd.svg'}
         ]
 
     pack:
