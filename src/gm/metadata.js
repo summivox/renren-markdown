@@ -5,7 +5,6 @@
 // @version       <%= pkg.version %>
 // @description   <%= pkg.description %>
 // @grant         GM_xmlhttpRequest
-// @grant         unsafeWindow
 // @include       *blog.renren.com/blog/*Blog*
 // @include       *blog.renren.com/blog/*edit*
 // @include       *blog.renren.com/*Entry*

@@ -59,7 +59,7 @@ module.exports = (grunt) ->
     @concat = {}
 
     # minify and join libraries
-    @uglify.lib = 
+    @uglify.lib =
       files: [
         {
           expand: true
@@ -78,7 +78,7 @@ module.exports = (grunt) ->
     ]
 
     # minify and pack CSS
-    @cssmin.main = 
+    @cssmin.main =
       files: [
         {
           expand: true
@@ -106,7 +106,7 @@ module.exports = (grunt) ->
     ]
 
     # join all packed files
-    @concat.pack = 
+    @concat.pack =
       src: 'build/packed/*.js'
       dest: 'build/packed.js'
     grunt.registerTask 'pack-all', [
@@ -175,7 +175,7 @@ module.exports = (grunt) ->
     ]
 
     # make chrome plugin
-    @template.chrome = 
+    @template.chrome =
       files: [
         {src: 'src/chrome/manifest.json', dest: 'dist/chrome/manifest.json'}
       ]
@@ -194,6 +194,22 @@ module.exports = (grunt) ->
       'copy:chrome'
     ]
 
+    # make userscript
+    @template.gm =
+      files: [
+        {src: 'src/gm/metadata.js', dest: 'build/metadata.js'}
+      ]
+    @concat.gm =
+      src: [
+        'build/metadata.js'
+        'build/aio.js'
+      ]
+      dest: 'dist/gm/renren-markdown.user.js'
+    grunt.registerTask 'gm', [
+      'template:gm'
+      'concat:gm'
+    ]
+
     @ # grunt.initConfig
 
   grunt.registerTask 'default', [
@@ -202,4 +218,5 @@ module.exports = (grunt) ->
     'postproc'
     'aio'
     'chrome'
+    'gm'
   ]

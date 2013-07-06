@@ -5,7 +5,7 @@ postproc/gist
 do ->
   inited = false
 
-  urlRe = 
+  urlRe =
     ///
     ^(?:(?:http|https)\://)? # http:// or https:// or omitted protocol
     gist\.github\.com/
