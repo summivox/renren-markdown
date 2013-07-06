@@ -19,9 +19,18 @@ process.async = (cb) ->
   process._async(cb)
   process._async = (->)
 
+process.open = ->
+  tinymce.call 'getContent', (err, ret) ->
+    md = core.unembed ret
+    ui.setSource md
+    cron.trig()
+    ui.show()
+
 process.commit = ->
+  md = ui.getSource()
   el = ui.getPreview()
+  embed = core.embed md
   core.spanify el
   # TODO: extra steps
-  tinymce.call 'setContent', el.innerHTML, (->)
+  tinymce.call 'setContent', el.innerHTML + embed, (->)
   ui.hide()

@@ -19,7 +19,6 @@ ui.init = ->
     @mainCss = @mainDoc.getElementById 'css'
     @mainCss.textContent = PACKED_CSS['ui.css']
 
-
     @preview = @mainDoc.getElementById 'preview'
     @previewDoc = @preview.contentDocument
     await $(@previewDoc).ready defer()
@@ -34,11 +33,11 @@ ui.init = ->
 
     # FIXME: better editor open button
     @open = $('<input type="button" id="rrmd-ui-open" value="renren-markdown" />').insertBefore('#editor')[0]
-    
+
   )(defer())
 
   # hook up events
-  ui.el.open.addEventListener 'click', (e)-> ui.show()
+  ui.el.open.addEventListener 'click', (e)-> process.open()
   ui.el.area.addEventListener 'input', (e)-> cron.trig()
   ui.el.commit.addEventListener 'click', (e)-> process.commit()
 
@@ -58,6 +57,7 @@ ui.hide = (cb) ->
   cb?()
 
 ui.getSource = -> ui.el.area.value
+ui.setSource = (s) -> ui.el.area.value = s
 
 ui.getPreview = -> ui.el.previewBody.firstElementChild
 ui.setPreview = (el) -> do (body = ui.el.previewBody) ->

@@ -32,7 +32,7 @@ core.getAugCssRules = do ->
   # use iframe to get original css rules
   iframe = do ->
     n = 0
-    iframe = -> 
+    iframe = ->
       """<iframe
         id="rrmd_iframe_#{n++}"
         style="position:fixed; left: -10px; width: 1px; height: 1px;"
@@ -151,3 +151,24 @@ core.spanify = do ->
       $(el).wrap("""<span style="#{cssText}" />""")
 
     return rootEl # spanify
+
+# (hidden) message embedded into blog
+do ->
+  tag = 'http://dummy/$rrmd$'
+
+  core.embed = (s) ->
+    """<span style="display:none;">
+      <br/> == begin renren-markdown source ==
+      <br/> <span style="background-image:url('#{tag}')">#{util.str_to_b64(s)}</span>
+      <br/> == end renren-markdown source ==
+    </div>"""
+
+  core.unembed = (h) ->
+    h = h?.trim()
+    if !h then return ''
+    for el in $(h).find("span[style*='#{tag}']")
+      b64 = el.innerHTML?.trim()
+      if !b64 then continue
+      try return util.b64_to_str b64
+      catch e then continue
+    return ''
