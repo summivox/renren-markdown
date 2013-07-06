@@ -26,7 +26,7 @@ tinymce.call = do ->
       cb? err, null
 
 tinymce.init = ->
-  util.injectScript ->
+  util.injectScript document, ->
     ###!
     rrmd.tinymce (injected)
     !###

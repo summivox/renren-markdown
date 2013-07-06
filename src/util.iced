@@ -24,12 +24,12 @@ util.b64_to_str = (b64) -> decodeURIComponent escape window.atob b64
 # add script tag to document
 #   script => run
 #   fnction => IIFE
-util.injectScript = (x) ->
-  el = document.createElement 'script'
+util.injectScript = (doc, x) ->
+  el = doc.createElement 'script'
   el.textContent = switch typeof x
     when 'string' then x
     when 'function' then "(#{x.toString()})();"
-  document.head.appendChild el
+  doc.head.appendChild el
 
 # scrolling
 util.canScroll = (el) -> !! el?.scrollHeight?
