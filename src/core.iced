@@ -96,8 +96,8 @@ core.spanify = do ->
 
   # single element => span
   getSpan = (el) ->
+    if !el? then return $(dummy)
     ret = document.createElement 'span'
-    if !el? then return ret
 
     # special: <pre>-formatting
     if el.tagName == 'PRE'
