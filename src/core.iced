@@ -128,7 +128,8 @@ core.spanify = do ->
 
     # elem => span with "display: xxx"
     for [sel, disp] in [
-      ['pre, code', 'inline']
+      ['pre', 'block']
+      ['code', 'inline']
       ['s, del', 'inline']
       ['div, p, blockquote, q, article', 'block']
       ['h1, h2, h3, h4, h5, h6', 'block']
@@ -144,7 +145,7 @@ core.spanify = do ->
         $(x).replaceWith(s)
 
     # style on <a> is pruned, so restore by wrapping
-    for el in rootEl.querySelector 'a'
+    for el in util.arrayize rootEl.querySelectorAll 'a'
       cssText = util.dquote_to_squote el.style.cssText # same as above
       el.style.cssText = ''
       $(el).wrap("""<span style="#{cssText}" />""")

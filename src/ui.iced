@@ -6,7 +6,7 @@ ui = {}
 
 ui.inited = false
 ui.init = ->
-  ui.cssClear = PACKED_CSS['cssreset.css'] + '\n' + PACKED_CSS['cssbase.css']
+  ui.cssClear = markdown.cssClearText
 
   # construct UI HTML & CSS
   await ui.el = new ((autocb) ->

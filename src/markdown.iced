@@ -25,9 +25,11 @@ markdown.settings = {
   smartLists: true
 }
 
+markdown.cssClearText = PACKED_CSS['cssreset.css'] + '\n' + PACKED_CSS['cssbase.css']
+
 markdown.setCss = (cssText, cb) ->
   markdown.cssText = cssText
-  core.getAugCssRules cssText, (cssRules) ->
+  core.getAugCssRules markdown.cssClearText + cssText, (cssRules) ->
     markdown.cssRules = cssRules
     cb?()
 
