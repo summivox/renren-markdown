@@ -3,5 +3,5 @@ test
 !###
 
 $ ->
-  area = document.getElementById 'area'
-  area.addEventListener 'input', handler = (e) -> cron.trig()
+  # await setTimeout defer(), 1000
+  # ui.show()

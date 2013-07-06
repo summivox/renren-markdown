@@ -26,7 +26,8 @@ cron.mainHandler = do ->
   mainHandler = ->
     if --n == 0
       cron.mainId = null
-      console.log 'cron.mainHandler: TODO: async' # TODO
+      console.log 'cron.mainHandler: async'
+      process.async()
     else
       cron.mainId = setTimeout cron.mainHandler, cron.mainPeriod
       if cron.hasUpdate

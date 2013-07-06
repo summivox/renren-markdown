@@ -5,18 +5,15 @@ module.exports = (grunt) ->
   ############
   # plugins
 
-  grunt.loadNpmTasks 'grunt-iced-coffee'
-  grunt.loadNpmTasks 'grunt-contrib-copy'
-  grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-contrib-clean'
+  grunt.loadNpmTasks 'grunt-iced-coffee'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
   grunt.loadNpmTasks 'grunt-contrib-cssmin'
   grunt.loadNpmTasks 'grunt-svgmin'
+  grunt.loadNpmTasks 'grunt-contrib-concat'
+  grunt.loadNpmTasks 'grunt-contrib-copy'
 
-
-  ############
   # text files -> JSON
-
   grunt.registerMultiTask 'pack', 'pack text files into JSONP', ->
     path = require 'path'
     for x in @files
@@ -28,10 +25,7 @@ module.exports = (grunt) ->
       ret = ";var #{x.name}=#{JSON.stringify(o)};\n"
       grunt.file.write x.dest, ret, encoding: 'utf-8'
 
-
-  ############
   # template
-
   grunt.registerMultiTask 'template', ->
     for x in @files
       src = x.src[0] # FIXME: support one src only
@@ -42,160 +36,170 @@ module.exports = (grunt) ->
 
 
   ############
-  # main config
+  # config
 
-  config =
-    pkg: grunt.file.readJSON('package.json')
+  grunt.initConfig new ->
+    @pkg = grunt.file.readJSON('package.json')
 
-    coffee: # actually grunt-iced-coffee
-      options:
-        bare: true
-        runtime: 'inline'
-      main:
-        options:
-          join: true
-        files: [
-          {src: 'src/*.{iced,coffee}', dest: 'build/main.js'}
-        ]
-      other:
-        files: [
-          {
-            expand: true
-            cwd: 'src/'
-            src: '*/**/*.{iced,coffee}'
-            dest: 'build/'
-            ext: '.js'
-          }
-        ]
-
-    uglify:
-      options:
-        preserveComments: 'some'
-      lib:
-        files: [
-          {
-            expand: true
-            cwd: 'lib/'
-            src: '*.js'
-            dest: 'build/lib/'
-            ext: '.min.js'
-          }
-        ]
-
-    cssmin:
-      markdown:
-        files: [
-          {
-            expand: true
-            cwd: 'src/css/'
-            src: '*.css'
-            dest: 'build/css/'
-          }
-        ]
-
-    svgmin:
-      rrmd:
-        files: [
-          {src: 'images/rrmd.svg', dest: 'build/images/rrmd.svg'}
-        ]
-
-    pack:
-      css:
-        name: 'PACKED_CSS'
-        src: 'build/css/*.css'
-        dest: 'build/packed/css.js'
-      html:
-        name: 'PACKED_HTML'
-        src: 'src/html/*.html'
-        dest: 'build/packed/html.js'
-
-    concat:
-      lib: # all minified libraries
-        src: 'build/lib/*.js'
-        dest: 'build/lib.js'
-      pack: # all packed text files
-        src: 'build/packed/*.js'
-        dest: 'build/packed.js'
-      #main: # common code (without compatibility layer)
-        #src: [
-          #'build/lib.js'
-          #'build/packed.js'
-          #'src/emoticon.js' # TODO: auto emoticon.js
-          #'build/iced/renren-markdown.js'
-        #]
-        #dest: 'build/renren-markdown.main.js'
-      #chrome:
-        #src: [
-          #'build/iced/chrome/env.js'
-          #'build/renren-markdown.main.js'
-        #]
-        #dest: 'dist/chrome/js/renren-markdown.chrome.js'
-      #gm:
-        #src: [
-          #'build/metadata.js'
-          #'build/iced/gm/env.js'
-          #'build/renren-markdown.main.js'
-        #]
-        #dest: 'dist/gm/renren-markdown.user.js'
-
-    copy:
-      chrome:
-        files: [
-          {src: 'build/iced/chrome/inject.js', dest: 'dist/chrome/js/inject.js'}
-          {src: 'images/icon.png', dest: 'dist/chrome/img/icon.png'}
-        ]
-
-    template: # for metadata
-      chrome:
-        files: [
-          {src: 'src/chrome/manifest.json', dest: 'dist/chrome/manifest.json'}
-        ]
-      gm:
-        files: [
-          {src: 'src/gm/metadata.js', dest: 'build/metadata.js'}
-        ]
-
-    clean:
+    # default
+    @clean =
       build: ['build/*']
       dist: ['dist/*']
+    @coffee =
+      options:
+        bare: true
+    @uglify =
+      options:
+        preserveComments: 'some'
+    @cssmin = {}
+    @svgmin = {}
+    @pack = {}
+    @template = {}
+    @copy = {}
+    @concat = {}
 
-  grunt.initConfig config
+    # minify and join libraries
+    @uglify.lib = 
+      files: [
+        {
+          expand: true
+          cwd: 'lib/'
+          src: '*.js'
+          dest: 'build/lib/'
+          ext: '.min.js'
+        }
+      ]
+    @concat.lib =
+      src: 'build/lib/*.js'
+      dest: 'build/lib.js'
+    grunt.registerTask 'lib', [
+      'uglify:lib'
+      'concat:lib'
+    ]
 
-  grunt.registerTask 'lib', [
-    'uglify:lib'
-    'concat:lib'
-  ]
+    # minify and pack CSS
+    @cssmin.main = 
+      files: [
+        {
+          expand: true
+          cwd: 'src/css/'
+          src: '*.css'
+          dest: 'build/css/'
+        }
+      ]
+    @pack.css =
+      name: 'PACKED_CSS'
+      src: 'build/css/*.css'
+      dest: 'build/packed/css.js'
+    grunt.registerTask 'pack-css', [
+      'cssmin:main'
+      'pack:css'
+    ]
 
-  grunt.registerTask 'css', [
-    'cssmin:markdown'
-    'pack:css'
-  ]
+    # pack HTML
+    @pack.html =
+      name: 'PACKED_HTML'
+      src: 'src/html/*.html'
+      dest: 'build/packed/html.js'
+    grunt.registerTask 'pack-html', [
+      'pack:html'
+    ]
 
-  grunt.registerTask 'prepare', [
-    'lib'
-    'css'
-  ]
+    # join all packed files
+    @concat.pack = 
+      src: 'build/packed/*.js'
+      dest: 'build/packed.js'
+    grunt.registerTask 'pack-all', [
+      'pack-css'
+      'pack-html'
+      'concat:pack'
+    ]
 
-  grunt.registerTask 'compile', [
-    'coffee:main'
-    #'concat:main'
-  ]
+    # main code
+    @coffee.main =
+      options:
+        join: true
+        runtime: 'window'
+      files: [
+        {src: 'src/*.{iced,coffee}', dest: 'build/main.js'}
+      ]
+    grunt.registerTask 'main', [
+      'coffee:main'
+    ]
 
-  grunt.registerTask 'chrome', [
-    'template:chrome'
-    'copy:chrome'
-    'concat:chrome'
-  ]
+    # postprocessors
+    @coffee.postproc =
+      options:
+        join: false
+        runtime: 'none'
+      files: [
+        {
+          expand: true
+          cwd: 'src/postproc/'
+          src: '*.{iced,coffee}'
+          dest: 'build/postproc/'
+          ext: '.js'
+        }
+      ]
+    @copy.postproc =
+      options:
+        join: false
+      files: [
+        {
+          expand: true
+          cwd: 'src/postproc/'
+          src: '*.js'
+          dest: 'build/postproc/'
+        }
+      ]
+    grunt.registerTask 'postproc', [
+      'coffee:postproc'
+      'copy:postproc'
+    ]
 
-  grunt.registerTask 'gm', [
-    'template:gm'
-    'concat:gm'
-  ]
+    # make all-in-one script (lib + packed + main code + postproc)
+    @concat.aio =
+      files: [
+        {
+          src: [
+            'build/lib.js'
+            'build/packed.js'
+            'build/main.js'
+            'build/postproc/*.js'
+          ]
+          dest: 'build/aio.js'
+        }
+      ]
+    grunt.registerTask 'aio', [
+      'concat:aio'
+    ]
+
+    # make chrome plugin
+    @template.chrome = 
+      files: [
+        {src: 'src/chrome/manifest.json', dest: 'dist/chrome/manifest.json'}
+      ]
+    @copy.chrome =
+      files: [
+        {src: 'build/aio.js', dest: 'dist/chrome/aio.js'}
+        { # FIXME: build/convert/copy correct images
+          expand: true
+          cwd: 'images/'
+          src: '**/*'
+          dest: 'dist/chrome/images/'
+        }
+      ]
+    grunt.registerTask 'chrome', [
+      'template:chrome'
+      'copy:chrome'
+    ]
+
+    @ # grunt.initConfig
 
   grunt.registerTask 'default', [
-    'compile'
-    'pack'
-    'concat:pack'
-    #'chrome'
-    #'gm'
+    'pack-all'
+    'main'
+    'postproc'
+    'aio'
+    'chrome'
   ]

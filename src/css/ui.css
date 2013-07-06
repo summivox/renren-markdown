@@ -1,0 +1,56 @@
+/*!
+ * renren-markdown ui stylesheet
+ */
+
+#left {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    z-index: 10;
+}
+#right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    z-index: 10;
+}
+
+#area {
+    margin: 0;
+    padding: 0;
+    font-family: 'Consolas', 'Inconsolata', 'Courier New', 'Courier', 'monospace'
+}
+#preview {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.full {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+.pad {
+    margin: 0;
+    padding: 0;
+    border: solid rgba(0,0,0,0);
+    border-width: 10px 15px;
+}
+
+#commit {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 2147483647;
+}
