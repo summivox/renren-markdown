@@ -3,7 +3,7 @@ xhr
 !###
 
 if !window.GM_xmlhttpRequest?
-  if chrome?.extensions?
+  if chrome?.extension?
     window.GM_xmlhttpRequest = (o) ->
       xhr = new XMLHttpRequest()
       [
@@ -45,3 +45,20 @@ if !window.GM_xmlhttpRequest?
   else
     window.GM_xmlhttpRequest = ->
       throw new Error 'GM_xmlhttpRequest missing'
+
+# shortcuts
+
+xhr = {}
+
+xhr.get = (url, cb) ->
+  _cb = (e) ->
+    if status == 200
+      cb(null, e.responseText)
+    else
+      cb(e.status)
+  GM_xmlhttpRequest {
+    method: 'GET'
+    url: url
+    onload: _cb
+    onerror: _cb
+  }
