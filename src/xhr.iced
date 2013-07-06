@@ -52,7 +52,7 @@ xhr = {}
 
 xhr.get = (url, cb) ->
   _cb = (e) ->
-    if status == 200
+    if e.status == 200
       cb(null, e.responseText)
     else
       cb(e.status)
