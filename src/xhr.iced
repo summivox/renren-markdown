@@ -2,9 +2,9 @@
 xhr
 !###
 
-if !window.GM_xmlHttpRequest?
+if !window.GM_xmlhttpRequest?
   if chrome?.extensions?
-    window.GM_xmlHttpRequest = (o) ->
+    window.GM_xmlhttpRequest = (o) ->
       xhr = new XMLHttpRequest()
       [
         'onreadystatechange'
@@ -43,5 +43,5 @@ if !window.GM_xmlHttpRequest?
       xhr.open o.method, o.url, true, o.user, o.password
       xhr.send o.data
   else
-    window.GM_xmlHttpRequest = ->
-      throw new Error 'GM_xmlHttpRequest missing'
+    window.GM_xmlhttpRequest = ->
+      throw new Error 'GM_xmlhttpRequest missing'
