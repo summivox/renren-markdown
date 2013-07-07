@@ -23,13 +23,18 @@ util.b64_to_str = (b64) -> decodeURIComponent escape window.atob b64
 
 # add script tag to document
 #   script => run
-#   fnction => IIFE
+#   function => IIFE
 util.injectScript = (doc, x) ->
   el = doc.createElement 'script'
   el.textContent = switch typeof x
     when 'string' then x
     when 'function' then "(#{x.toString()})();"
   doc.head.appendChild el
+
+# inject function into global namespace
+util.injectFunction = (doc, name, f) ->
+  if f instanceof Function
+    util.injectScript doc, ";var #{name} = #{f.toString()};"
 
 # scrolling
 util.canScroll = (el) -> !! el?.scrollHeight?
@@ -47,3 +52,8 @@ util.setScrollRatio = (el, ratio) ->
   if !isFinite(ratio) then return null
   ratio = Math.min(Math.max(ratio, 0), 1)
   el.scrollTop = ratio * util.scrollRange(el)
+
+# periodically do check until true, then callback
+util.pollUntil = (period, check, cb) ->
+  if check instanceof Function && cb instanceof Function
+    iid = setInterval (-> if check() then cb clearInterval iid), period # pun intended
