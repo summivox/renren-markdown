@@ -68,7 +68,7 @@ do ->
       console.log 'rrmd postproc/gist: fail to init'
       return
 
-    postproc.register 'gist', 'a', (el)->
+    postproc.register 'gist', 'a', (el) ->
       if el.href.trim() == el.innerHTML.trim() && m = el.href.match urlRe
         id = m[1]
         if (cachedEl = cache[id])?
