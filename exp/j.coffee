@@ -1,5 +1,3 @@
-# marked = require './marked.js'
-
 s = """
 This is a paragraph with inline math $$ a=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a} $$. How wonderful!
 
@@ -15,17 +13,17 @@ $$$
 """
 
 $ ->
-  do ->
-    script = document.createElement("script")
-    script.type = "text/javascript"
-    script.src  = "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
-    $("head")[0].appendChild(script)
+  #do ->
+    #script = document.createElement("script")
+    #script.type = "text/javascript"
+    #script.src  = "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+    #$("head")[0].appendChild(script)
 
-  marked.setOptions
-    mathjax: true
+  #marked.setOptions
+    #mathjax: true
 
-  console.log s
-  console.log (m = marked s)
+  #console.log s
+  #console.log (m = marked s)
 
   do ->
     iid = setInterval (->
@@ -36,22 +34,21 @@ $ ->
 
   boot = ->
     d = $ '#d'
-    d.html m
-    arr = d.find("script[type^='math/tex']").toArray()
-    console.log '==arr=='
-    console.log arr
-    console.log '==/arr=='
-    for el in arr
+    #d.html m
+    for el in d.find("script[type^='math/tex']").toArray()
       do (el) -> MathJax.Hub.Queue(
         ['Process', MathJax.Hub, el, ->
           console.log 'done'
           j = MathJax.Hub.getJaxFor(el)
-          rendered = document.querySelector "\##{j.inputID}-Frame span.math"
+          base = document.querySelector("\##{j.inputID}-Frame").firstElementChild
+          $(base).appendTo('#d2')
+          rendered = base.firstElementChild
           # @parentElement.style.position = 'fixed'
           html2canvas [rendered], onrendered: (x) ->
             console.log '--image--'
             s = x.toDataURL('image/png')
             console.log 'png: ' + s.length
             console.log s
+            # d.css('left', '-50000px')
         ]
       )

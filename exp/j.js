@@ -5,21 +5,8 @@
   s = "This is a paragraph with inline math $$ a=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a} $$. How wonderful!\n\nAnd here comes display math:\n$$$ G(s)=\\frac{s-1}{s(s+1)} $$$\nwith lots of love.\n$$$\n\\begin{aligned}\n\\nabla \\times \\vec{\\mathbf{B}} -\\, \\frac1c\\, \\frac{\\partial\\vec{\\mathbf{E}}}{\\partial t} & = \\frac{4\\pi}{c}\\vec{\\mathbf{j}} \\\\   \\nabla \\cdot \\vec{\\mathbf{E}} & = 4 \\pi \\rho \\\\\n\\nabla \\times \\vec{\\mathbf{E}}\\, +\\, \\frac1c\\, \\frac{\\partial\\vec{\\mathbf{B}}}{\\partial t} & = \\vec{\\mathbf{0}} \\\\\n\\nabla \\cdot \\vec{\\mathbf{B}} & = 0 \\end{aligned}\n$$$";
 
   $(function() {
-    var boot, m;
+    var boot;
 
-    (function() {
-      var script;
-
-      script = document.createElement("script");
-      script.type = "text/javascript";
-      script.src = "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-      return $("head")[0].appendChild(script);
-    })();
-    marked.setOptions({
-      mathjax: true
-    });
-    console.log(s);
-    console.log((m = marked(s)));
     (function() {
       var iid;
 
@@ -31,25 +18,23 @@
       }), 1000);
     })();
     return boot = function() {
-      var arr, d, el, _i, _len, _results;
+      var d, el, _i, _len, _ref, _results;
 
       d = $('#d');
-      d.html(m);
-      arr = d.find("script[type^='math/tex']").toArray();
-      console.log('==arr==');
-      console.log(arr);
-      console.log('==/arr==');
+      _ref = d.find("script[type^='math/tex']").toArray();
       _results = [];
-      for (_i = 0, _len = arr.length; _i < _len; _i++) {
-        el = arr[_i];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        el = _ref[_i];
         _results.push((function(el) {
           return MathJax.Hub.Queue([
             'Process', MathJax.Hub, el, function() {
-              var j, rendered;
+              var base, j, rendered;
 
               console.log('done');
               j = MathJax.Hub.getJaxFor(el);
-              rendered = document.querySelector("\#" + j.inputID + "-Frame span.math");
+              base = document.querySelector("\#" + j.inputID + "-Frame").firstElementChild;
+              $(base).appendTo('#d2');
+              rendered = base.firstElementChild;
               return html2canvas([rendered], {
                 onrendered: function(x) {
                   console.log('--image--');
