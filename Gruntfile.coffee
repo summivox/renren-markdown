@@ -89,7 +89,7 @@ module.exports = (grunt) ->
       ]
     @pack.css =
       name: 'PACKED_CSS'
-      src: 'build/css/*.css'
+      src: 'build/**/*.css'
       dest: 'build/packed/css.js'
     grunt.registerTask 'pack-css', [
       'cssmin:main'
@@ -99,7 +99,7 @@ module.exports = (grunt) ->
     # pack HTML
     @pack.html =
       name: 'PACKED_HTML'
-      src: 'src/html/*.html'
+      src: 'src/**/*.html'
       dest: 'build/packed/html.js'
     grunt.registerTask 'pack-html', [
       'pack:html'
