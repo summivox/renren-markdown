@@ -3,34 +3,33 @@ postproc/mathjax
 !###
 
 # Async process:
-#   - `<script type="math/tex">` tagged in sandbox, -> injected
-#   - injected calls MathJax
-#   - MathJax callback injected, -> sandbox
-#   - sandbox calls HTML2Canvas
-#   - HTML2Canvas callback sandbox, then callback postproc manager
+#   - stash postproc callback
+#   - `<script type="math/tex">` tagged in sandbox, message injected
+#   - injected calls MathJax, callback: message sandbox
+#   - sandbox calls HTML2Canvas, callback: postproc callback
 
-util.pollUntil 500, (-> ui.inited), ->
+util.pollUntil 250, (-> ui.inited), ->
   doc = ui.el.previewDoc
   win = ui.el.previewWin
 
   # tag
   n = 0
-  getTag = (i) -> "rrmd-pp-mathjax-#{i}"
+  getTag = (seq) -> "rrmd-pp-mathjax-#{seq}"
 
-  # transaction (keep track of each chain of async call)
-  tran = []
+  # keep track of callbacks
+  callback = []
 
   postproc.register 'mathjax', "script[type^='math/tex']", (el) ->
-    i = n++
-    tag = "rrmd-pp-mathjax-#{i}"
+    seq = n++
+    tag = "rrmd-pp-mathjax-#{seq}"
     el.classList.add tag
     {
       changed: true
       async: (el2, cb) ->
         win.postMessage {
-          _rrmd_pp_mathjax: i
+          _rrmd_pp_mathjax: seq
         }, win.location.origin
-        tran[i] = {el, cb}
+        callback[seq] = cb
     }
 
   # NOTE: We could have embedded MathJax loader directly into `ui-preview.html` but
@@ -44,12 +43,18 @@ util.pollUntil 500, (-> ui.inited), ->
     rrmd.postproc/mathjax (injected)
     !###
 
+    debugger
+
     # get ID of rendered math from source
-    getSpanId = (srcEl) ->
+    getRenderedId = (srcEl) ->
       j = MathJax.Hub.getJaxFor(srcEl)
       "#{j.inputID}-Frame span.math"
 
-    pollUntil 500, (-> MathJax?.isReady), ->
+    pollUntil 500, (->
+      ret = MathJax?.isReady
+      console.log ret
+      ret
+    ), ->
       console.log 'mathjax: ready'
       # FIXME: reduce coupling (seems mission impossible)
       previewDoc = document
@@ -58,33 +63,32 @@ util.pollUntil 500, (-> ui.inited), ->
       window.addEventListener 'message', handler = (e) ->
         # check validity of message
         if !e? || e.origin != window.location.origin then return
-        if !(d = e.data)? || !(i = d._rrmd_pp_mathjax)? then return
+        if !(d = e.data)? || !(seq = d._rrmd_pp_mathjax)? then return
 
-        cb = -> window.postMessage {
-          _rrmd_pp_mathjax_cb: i
-          display_id: 
-        }, window.location.origin
-
-        sel = '.' + $rrmd$mathjax$getTag(i)
-        console.log sel
+        sel = '.' + $rrmd$mathjax$getTag(seq)
         el = previewDoc.querySelector sel
-        console.log el
+
         MathJax.Hub.Queue(
           ['Typeset', MathJax.Hub, el, ->
             console.log 'mathjax: rendered'
             console.log el.textContent
-            display = document.querySelector('#' + getSpanId(el))
-            cb()
+            window.postMessage {
+              _rrmd_pp_mathjax_cb: seq
+              renderedId: getRenderedId el
+            }, window.location.origin
           ]
         )
 
   # listen to injected script
-  window.addEventListener 'message', handler = (e) ->
+  win.addEventListener 'message', handler = (e) ->
     # check validity of message
-    if !e? || e.origin != window.location.origin then return
-    if i = (d = e.data)?._rrmd_pp_mathjax_cb
-      html2canvas [display], onrendered: (canvas) ->
-        s = canvas.toDataUrl 'image/png'
+    if !e? || e.origin != win.location.origin then return
+    if !(seq = (d = e.data)?._rrmd_pp_mathjax_cb)?
+      rendered = doc.getElementById d.renderedId
+      # name seems strange -- this is the "rasterize" step
+      html2canvas [rendered], onrendered: (canvas) ->
+        dataUrl = canvas.toDataUrl 'image/png'
         console.log 'mathjax: rasterized'
-        console.log s
-        cb()
+        console.log dataUrl
+        # TODO: do something with dataUrl
+        callback[seq]?()
