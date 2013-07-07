@@ -29,7 +29,7 @@ postproc.run = do ->
           else if el2 instanceof window.Node
             el2.classList.add tag
             $(el).replaceWith(el2)
-          if typeof(async) == 'function'
+          if async instanceof Function
             ct.push {async, el2}
     return (cb) ->
       err = new Array ct.length
