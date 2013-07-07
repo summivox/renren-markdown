@@ -82,3 +82,7 @@ util.pollUntil 250, (-> ui.inited), ->
 
       tran[seq].cb?()
       delete tran[seq]
+
+      # TODO:
+      #   display => center (with extra div)
+      #   final dataUrl => emhvb.blahgeek.com/?
