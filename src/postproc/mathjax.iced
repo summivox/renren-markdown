@@ -2,93 +2,83 @@
 postproc/mathjax
 !###
 
-# Async process:
-#   - stash postproc callback
-#   - `<script type="math/tex">` tagged in sandbox, message injected
-#   - injected calls MathJax, callback: message sandbox
-#   - sandbox calls HTML2Canvas, callback: postproc callback
+
+# postproc async process:
+#   1. Copy math to dummy container
+#   2. Pass down for rendering
+#   3. Callback up for rasterization
+
+$(PACKED_HTML['mathjax-loadscript.html']).appendTo(document.head)
+$dummy = $(PACKED_HTML['mathjax-dummy.html']).appendTo(document.body)
 
 util.pollUntil 250, (-> ui.inited), ->
-  doc = ui.el.previewDoc
-  win = ui.el.previewWin
 
-  # tag
+  # sequence number
   n = 0
   getTag = (seq) -> "rrmd-pp-mathjax-#{seq}"
 
-  # keep track of callbacks
-  callback = []
+  # transaction
+  tran = []
 
+  # step 1
   postproc.register 'mathjax', "script[type^='math/tex']", (el) ->
-    seq = n++
-    tag = "rrmd-pp-mathjax-#{seq}"
+    seq = ++n
+    tag = getTag(seq)
     el.classList.add tag
     {
       changed: true
       async: (el2, cb) ->
-        win.postMessage {
+        srcEl = $(el2).clone().appendTo($dummy)[0]
+        tran[seq] = {el2, cb}
+        window.postMessage {
           _rrmd_pp_mathjax: seq
-        }, win.location.origin
-        callback[seq] = cb
+        }, window.location.origin
     }
 
-  # NOTE: We could have embedded MathJax loader directly into `ui-preview.html` but
-  # I've always considered this a plugin, so I don't want to mix it with the core.
-  $(PACKED_HTML['mathjax-loadscript.html']).appendTo(doc.head)
-
-  util.injectFunction doc, '$rrmd$mathjax$getTag', getTag
-  util.injectFunction doc, 'pollUntil', util.pollUntil
-  util.injectScript doc, ->
+  # step 2
+  util.injectFunction document, '$rrmd$pp$mathjax$getTag', getTag
+  util.injectScript document, -> do ->
     ###!
-    rrmd.postproc/mathjax (injected)
+    rrmd.postproc/mathjax
     !###
 
-    debugger
-
-    # get ID of rendered math from source
-    getRenderedId = (srcEl) ->
+    getTag = $rrmd$pp$mathjax$getTag
+    getRenderedSel = (srcEl) ->
       j = MathJax.Hub.getJaxFor(srcEl)
-      "#{j.inputID}-Frame span.math"
+      "\##{j.inputID}-Frame span.math"
 
-    pollUntil 500, (->
-      ret = MathJax?.isReady
-      console.log ret
-      ret
-    ), ->
-      console.log 'mathjax: ready'
-      # FIXME: reduce coupling (seems mission impossible)
-      previewDoc = document
-        .getElementById('rrmd-ui-loader').contentDocument
-        .getElementById('preview').contentDocument
-      window.addEventListener 'message', handler = (e) ->
-        # check validity of message
-        if !e? || e.origin != window.location.origin then return
-        if !(d = e.data)? || !(seq = d._rrmd_pp_mathjax)? then return
+    window.addEventListener 'message', (e) ->
+      # check validity of message
+      if !e? || e.origin != window.location.origin then return
+      if !(d = e.data)? || !(seq = d._rrmd_pp_mathjax)? then return
+      srcEl = document.getElementsByClassName(getTag(seq))[0]
+      MathJax.Hub.Queue(
+        ['Typeset', MathJax.Hub, srcEl, ->
+          console.log 'mathjax: rendered'
+          console.log srcEl.textContent
+          window.postMessage {
+            _rrmd_pp_mathjax_cb: seq
+            renderedSel: getRenderedSel srcEl
+          }, window.location.origin
+        ]
+      )
 
-        sel = '.' + $rrmd$mathjax$getTag(seq)
-        el = previewDoc.querySelector sel
-
-        MathJax.Hub.Queue(
-          ['Typeset', MathJax.Hub, el, ->
-            console.log 'mathjax: rendered'
-            console.log el.textContent
-            window.postMessage {
-              _rrmd_pp_mathjax_cb: seq
-              renderedId: getRenderedId el
-            }, window.location.origin
-          ]
-        )
-
-  # listen to injected script
-  win.addEventListener 'message', handler = (e) ->
+  # step 3
+  window.addEventListener 'message', (e) ->
     # check validity of message
-    if !e? || e.origin != win.location.origin then return
-    if !(seq = (d = e.data)?._rrmd_pp_mathjax_cb)?
-      rendered = doc.getElementById d.renderedId
-      # name seems strange -- this is the "rasterize" step
-      html2canvas [rendered], onrendered: (canvas) ->
-        dataUrl = canvas.toDataUrl 'image/png'
-        console.log 'mathjax: rasterized'
-        console.log dataUrl
-        # TODO: do something with dataUrl
-        callback[seq]?()
+    if !e? || e.origin != window.location.origin then return
+    if !(d = e.data)? || !(seq = d._rrmd_pp_mathjax_cb)? then return
+
+    rendered = document.querySelector d.renderedSel
+
+    html2canvas [rendered], onrendered: (canvas) ->
+      dataUrl = canvas.toDataURL('image/png')
+      console.log 'mathjax: rasterized: ' + dataUrl.length
+      console.log dataUrl
+
+      img = document.createElement 'img'
+      img.src = dataUrl
+      $(tran[seq].el2).replaceWith(img)
+
+      tran[seq].cb?()
+      delete tran[seq]

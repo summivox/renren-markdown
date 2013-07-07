@@ -33,7 +33,6 @@
               console.log('done');
               j = MathJax.Hub.getJaxFor(el);
               base = document.querySelector("\#" + j.inputID + "-Frame").firstElementChild;
-              $(base).appendTo('#d2');
               rendered = base.firstElementChild;
               return html2canvas([rendered], {
                 onrendered: function(x) {
