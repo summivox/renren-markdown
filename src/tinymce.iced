@@ -11,6 +11,7 @@ tinymce.call = do ->
   call = (method, arg..., cb) ->
     seq = ++n
     window.addEventListener 'message', handler = (e) ->
+      # check validity of message
       if !e? || e.origin != window.location.origin then return
       if (d = e.data)?._rrmd_tinymce_cb == seq
         cb? d.err, d.ret
