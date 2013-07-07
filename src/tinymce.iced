@@ -26,6 +26,7 @@ tinymce.call = do ->
       cb? err, null
 
 tinymce.init = ->
+  util.injectFunction document, 'pollUntil', util.pollUntil
   util.injectScript document, ->
     ###!
     rrmd.tinymce (injected)
@@ -33,12 +34,9 @@ tinymce.init = ->
 
     # bootstrap
     editor = null
-    iid = setInterval (->
-      if (editor = window.tinymce?.editors?[0])
-        clearInterval iid
-        window.$rrmd$tinymce = editor
-        init()
-    ), 500
+    pollUntil 500, (-> editor = window.tinymce?.editors?[0]), ->
+      window.$rrmd$tinymce = editor
+      init()
 
     init = ->
       window.addEventListener 'message', handler = (e) ->
