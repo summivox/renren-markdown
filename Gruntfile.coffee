@@ -136,7 +136,7 @@ module.exports = (grunt) ->
         {
           expand: true
           cwd: 'src/postproc/'
-          src: '*.{iced,coffee}'
+          src: '**/*.{iced,coffee}'
           dest: 'build/postproc/'
           ext: '.js'
         }
@@ -148,7 +148,7 @@ module.exports = (grunt) ->
         {
           expand: true
           cwd: 'src/postproc/'
-          src: '*.js'
+          src: '**/*.js'
           dest: 'build/postproc/'
         }
       ]
@@ -165,7 +165,7 @@ module.exports = (grunt) ->
             'build/lib.js'
             'build/packed.js'
             'build/main.js'
-            'build/postproc/*.js'
+            'build/postproc/**/*.js'
           ]
           dest: 'build/aio.js'
         }
