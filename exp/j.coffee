@@ -37,16 +37,21 @@ $ ->
   boot = ->
     d = $ '#d'
     d.html m
-    MathJax.Hub.Typeset d[0], ->
-      console.log 'done'
-      # $('span.math').parent().css('position', 'fixed').css('left', '-1000px')
-      $('span.math').each ->
-        # @parentElement.style.position = 'fixed'
-        html2canvas [@], onrendered: (x) ->
-          console.log '--image--'
-          #s = x.toDataURL('image/jpeg', 0.3)
-          #console.log 'jpeg: ' + s.length
-          #console.log s
-          s = x.toDataURL('image/png')
-          console.log 'png: ' + s.length
-          console.log s
+    arr = d.find("script[type^='math/tex']").toArray()
+    console.log '==arr=='
+    console.log arr
+    console.log '==/arr=='
+    for el in arr
+      do (el) -> MathJax.Hub.Queue(
+        ['Process', MathJax.Hub, el, ->
+          console.log 'done'
+          j = MathJax.Hub.getJaxFor(el)
+          rendered = document.querySelector "\##{j.inputID}-Frame span.math"
+          # @parentElement.style.position = 'fixed'
+          html2canvas [rendered], onrendered: (x) ->
+            console.log '--image--'
+            s = x.toDataURL('image/png')
+            console.log 'png: ' + s.length
+            console.log s
+        ]
+      )

@@ -31,23 +31,38 @@
       }), 1000);
     })();
     return boot = function() {
-      var d;
+      var arr, d, el, _i, _len, _results;
 
       d = $('#d');
       d.html(m);
-      return MathJax.Hub.Typeset(d[0], function() {
-        console.log('done');
-        return $('span.math').each(function() {
-          return html2canvas([this], {
-            onrendered: function(x) {
-              console.log('--image--');
-              s = x.toDataURL('image/png');
-              console.log('png: ' + s.length);
-              return console.log(s);
+      arr = d.find("script[type^='math/tex']").toArray();
+      console.log('==arr==');
+      console.log(arr);
+      console.log('==/arr==');
+      _results = [];
+      for (_i = 0, _len = arr.length; _i < _len; _i++) {
+        el = arr[_i];
+        _results.push((function(el) {
+          return MathJax.Hub.Queue([
+            'Process', MathJax.Hub, el, function() {
+              var j, rendered;
+
+              console.log('done');
+              j = MathJax.Hub.getJaxFor(el);
+              rendered = document.querySelector("\#" + j.inputID + "-Frame span.math");
+              return html2canvas([rendered], {
+                onrendered: function(x) {
+                  console.log('--image--');
+                  s = x.toDataURL('image/png');
+                  console.log('png: ' + s.length);
+                  return console.log(s);
+                }
+              });
             }
-          });
-        });
-      });
+          ]);
+        })(el));
+      }
+      return _results;
     };
   });
 
