@@ -21,6 +21,7 @@ ui.init = ->
 
     @preview = @mainDoc.getElementById 'preview'
     @previewDoc = @preview.contentDocument
+    @previewWin = @preview.contentWindow
     await $(@previewDoc).ready defer()
     @previewDoc.write PACKED_HTML['ui-preview.html']
     @previewCssClear = @previewDoc.getElementById 'css-clear'
