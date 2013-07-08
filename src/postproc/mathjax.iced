@@ -70,9 +70,11 @@ util.pollUntil 250, (-> ui.inited), ->
     if !(d = e.data)? || !(seq = d._rrmd_pp_mathjax_cb)? then return
 
     rendered = document.querySelector d.renderedSel
+    core.rasterize rendered, (dataUrl) ->
+      if !dataUrl
+        console.log 'mathjax: fail to rasterize'
+        return
 
-    html2canvas [rendered], onrendered: (canvas) ->
-      dataUrl = canvas.toDataURL('image/png')
       console.log 'mathjax: rasterized: ' + dataUrl.length
       console.log dataUrl
 

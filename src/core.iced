@@ -161,7 +161,7 @@ do ->
       <br/> == begin renren-markdown source ==
       <br/> <span style="background-image:url('#{tag}')">#{util.str_to_b64(s)}</span>
       <br/> == end renren-markdown source ==
-    </div>"""
+    </span>"""
 
   core.unembed = (h) ->
     h = h?.trim()
@@ -172,3 +172,9 @@ do ->
       try return util.b64_to_str b64
       catch e then continue
     return ''
+
+# rasterize an element and return data URL of the image
+core.rasterize = (el, cb) ->
+  if !(el instanceof Element) then return cb? null
+  html2canvas [el], onrendered: (canvas) ->
+    cb? canvas.toDataUrl 'image/png'
