@@ -34,8 +34,8 @@ core.getAugCssRules = do ->
     n = 0
     iframe = ->
       """<iframe
-        id="rrmd_iframe_#{n++}"
-        style="position:fixed; left: -10px; width: 1px; height: 1px;"
+        id="rrmd-cssrules-#{n++}"
+        style="position:fixed;width:0;height:0;"
       />"""
 
   getAugCssRules = (css, cb) ->
@@ -80,7 +80,7 @@ core.inlineCss = do ->
 # NOTE: container itself is not converted
 core.spanify = do ->
   # prevent element with empty innerHTML from being stripped
-  dummy = '<span style="display: none;">&nbsp;</span>'
+  dummy = '<span style="display:none;">&nbsp;</span>'
 
   getTextNodes = (rootEl) ->
     ret = []
@@ -128,15 +128,21 @@ core.spanify = do ->
 
     # elem => span with "display: xxx"
     for [sel, disp] in [
+      ['hr', 'block']
+      ['s, del', 'inline']
       ['pre', 'block']
       ['code', 'inline']
-      ['s, del', 'inline']
       ['div, p, blockquote, q, article', 'block']
       ['h1, h2, h3, h4, h5, h6', 'block']
-      ['hr', 'block']
+      ## table
       ['td, th', 'table-cell']
       ['tr', 'table-row']
-      ['tbody, thead, tfoot', 'table-row-group']
+      ['caption', 'table-caption']
+      ['col', 'table-column']
+      ['col-group', 'table-column-group']
+      ['thead', 'table-header-group']
+      ['tbody', 'table-row-group']
+      ['tfoot', 'table-footer-group']
       ['table', 'table']
     ]
       while (x = rootEl.querySelector sel)
