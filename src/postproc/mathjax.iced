@@ -58,8 +58,8 @@ util.pollUntil 250, (-> ui.inited), ->
       srcEl = document.getElementsByClassName(getTag(seq))[0]
       MathJax.Hub.Queue(
         ['Typeset', MathJax.Hub, srcEl, ->
-          console.log 'mathjax: rendered'
-          console.log srcEl.textContent
+          # console.log 'mathjax: rendered'
+          # console.log srcEl.textContent
           window.postMessage {
             _rrmd_pp_mathjax_cb: seq
             renderedSel: getRenderedSel srcEl
@@ -75,18 +75,18 @@ util.pollUntil 250, (-> ui.inited), ->
 
     rendered = document.querySelector d.renderedSel
     if !(rendered instanceof Element)
-      console.log "mathjax: can't find rendered math"
+      # console.log "mathjax: can't find rendered math"
       tran[seq].cb?()
       delete tran[seq]
       return
 
     core.rasterize rendered, (dataUrl) ->
       if !dataUrl
-        console.log 'mathjax: fail to rasterize'
+        # console.log 'mathjax: fail to rasterize'
         return
 
-      console.log 'mathjax: rasterized: ' + dataUrl.length
-      console.log dataUrl
+      # console.log 'mathjax: rasterized: ' + dataUrl.length
+      # console.log dataUrl
 
       $(rendered).detach()
 
