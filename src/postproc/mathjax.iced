@@ -39,7 +39,7 @@ util.pollUntil 250, (-> ui.inited), ->
   util.injectFunction document, '$rrmd$pp$mathjax$getTag', getTag
   util.injectScript document, -> do ->
     ###!
-    rrmd.postproc/mathjax
+    rrmd.postproc/mathjax (injected)
     !###
 
     getTag = $rrmd$pp$mathjax$getTag
