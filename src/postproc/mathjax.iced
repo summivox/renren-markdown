@@ -91,7 +91,9 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
       # console.log 'mathjax: rasterized: ' + dataUrl.length
       # console.log dataUrl
 
-      $(rendered).detach()
+      # delete associated elements from dummy
+      $(rendered).parentsUntil($dummy).last().remove()
+      $('.' + getTag(seq)).remove()
 
       img = document.createElement 'img'
       img.src = dataUrl
