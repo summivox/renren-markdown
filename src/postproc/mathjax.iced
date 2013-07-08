@@ -20,16 +20,20 @@ util.pollUntil 250, (-> ui.inited), ->
   # transaction
   tran = []
 
+  # cache
+  cache = []
+
   # step 1
   postproc.register 'mathjax', "script[type^='math/tex']", (el) ->
     seq = ++n
     tag = getTag(seq)
+    isDisplay = el.type.match /display/
     el.classList.add tag
     {
       changed: true
       async: (el2, cb) ->
         srcEl = $(el2).clone().appendTo($dummy)[0]
-        tran[seq] = {el2, cb}
+        tran[seq] = {el2, cb, isDisplay}
         window.postMessage {
           _rrmd_pp_mathjax: seq
         }, window.location.origin
@@ -70,6 +74,12 @@ util.pollUntil 250, (-> ui.inited), ->
     if !(d = e.data)? || !(seq = d._rrmd_pp_mathjax_cb)? then return
 
     rendered = document.querySelector d.renderedSel
+    if !(rendered instanceof Element)
+      console.log "mathjax: can't find rendered math"
+      tran[seq].cb?()
+      delete tran[seq]
+      return
+
     core.rasterize rendered, (dataUrl) ->
       if !dataUrl
         console.log 'mathjax: fail to rasterize'
@@ -78,12 +88,19 @@ util.pollUntil 250, (-> ui.inited), ->
       console.log 'mathjax: rasterized: ' + dataUrl.length
       console.log dataUrl
 
+      $(rendered).detach()
+
       img = document.createElement 'img'
       img.src = dataUrl
       $(tran[seq].el2).replaceWith(img)
+
+      # display-mode math: add back centering
+      if tran[seq].isDisplay
+        $(img).wrap('<span style="display:block;width:100%;text-align:center">')
 
       tran[seq].cb?()
       delete tran[seq]
 
       # TODO:
       #   display => center (with extra div)
+      #   cache

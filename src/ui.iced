@@ -33,7 +33,7 @@ ui.init = ->
     @commit = @mainDoc.getElementById 'commit'
 
     # FIXME: better editor open button
-    @open = $('<input type="button" id="rrmd-ui-open" value="renren-markdown" />').insertBefore('#editor')[0]
+    @open = $(PACKED_HTML['ui-button.html']).prependTo('#title_bg')[0]
 
   )(defer())
 
