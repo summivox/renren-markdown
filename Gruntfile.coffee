@@ -182,12 +182,13 @@ module.exports = (grunt) ->
     @copy.chrome =
       files: [
         {src: 'build/aio.js', dest: 'dist/chrome/aio.js'}
-        { # FIXME: build/convert/copy correct images
-          expand: true
-          cwd: 'images/'
-          src: '**/*'
-          dest: 'dist/chrome/images/'
-        }
+        {src: 'images/rrmd.png', dest: 'dist/chrome/images/rrmd.png'}
+        #{ # FIXME: build/convert/copy correct images
+          #expand: true
+          #cwd: 'images/'
+          #src: '**/*'
+          #dest: 'dist/chrome/images/'
+        #}
       ]
     grunt.registerTask 'chrome', [
       'template:chrome'
