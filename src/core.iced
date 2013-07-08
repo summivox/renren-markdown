@@ -177,4 +177,4 @@ do ->
 core.rasterize = (el, cb) ->
   if !(el instanceof Element) then return cb? null
   html2canvas [el], onrendered: (canvas) ->
-    cb? canvas.toDataUrl 'image/png'
+    cb? canvas.toDataURL 'image/png'
