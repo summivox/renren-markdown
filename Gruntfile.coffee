@@ -5,13 +5,16 @@ module.exports = (grunt) ->
   ############
   # plugins
 
-  grunt.loadNpmTasks 'grunt-contrib-clean'
-  grunt.loadNpmTasks 'grunt-iced-coffee'
-  grunt.loadNpmTasks 'grunt-contrib-uglify'
-  grunt.loadNpmTasks 'grunt-contrib-cssmin'
-  grunt.loadNpmTasks 'grunt-svgmin'
-  grunt.loadNpmTasks 'grunt-contrib-concat'
-  grunt.loadNpmTasks 'grunt-contrib-copy'
+  [
+    'grunt-contrib-clean'
+    'grunt-iced-coffee'
+    'grunt-contrib-uglify'
+    'grunt-contrib-cssmin'
+    'grunt-svgmin'
+    'grunt-contrib-concat'
+    'grunt-contrib-copy'
+    #'grunt-grunticon'
+  ].map (x) -> grunt.loadNpmTasks(x)
 
   # text files -> JSON
   grunt.registerMultiTask 'pack', 'pack text files into JSONP', ->
@@ -57,6 +60,7 @@ module.exports = (grunt) ->
     @template = {}
     @copy = {}
     @concat = {}
+    #@grunticon = {}
 
     # minify and join libraries
     @uglify.lib =
