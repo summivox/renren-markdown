@@ -29,8 +29,9 @@ process.open = ->
 process.commit = ->
   md = ui.getSource()
   el = ui.getPreview()
-  embed = core.embed md
+  core.relayAllImg el
   core.spanify el
+  embed = core.embed md
   # TODO: extra steps
   tinymce.call 'setContent', el.innerHTML + embed, (->)
   ui.hide()

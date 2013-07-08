@@ -87,4 +87,3 @@ util.pollUntil 250, (-> ui.inited), ->
 
       # TODO:
       #   display => center (with extra div)
-      #   final dataUrl => emhvb.blahgeek.com/?

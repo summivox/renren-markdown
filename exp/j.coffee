@@ -12,6 +12,8 @@ $$$
 $$$
 """
 
+console.log(s)
+
 $ ->
   #do ->
     #script = document.createElement("script")

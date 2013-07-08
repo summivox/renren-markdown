@@ -178,3 +178,16 @@ core.rasterize = (el, cb) ->
   if !(el instanceof Element) then return cb? null
   html2canvas [el], onrendered: (canvas) ->
     cb? canvas.toDataURL 'image/png'
+
+core.relayDataUrl = do ->
+  re = /data:([^;])+;base64,([\w\+\/\=]+)/
+  prefix = 'http://emhvb.blahgeek.com/?'
+  relayDataUrl = (dataUrl) ->
+    if m = dataUrl.match re
+      b64 = m[2]
+      dataUrl = prefix + b64
+    dataUrl
+
+core.relayAllImg = (rootEl) ->
+  for el in util.arrayize rootEl.querySelectorAll "img[src^='data']"
+    el.src = core.relayDataUrl el.src
