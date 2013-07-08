@@ -102,5 +102,4 @@ util.pollUntil 250, (-> ui.inited), ->
       delete tran[seq]
 
       # TODO:
-      #   display => center (with extra div)
       #   cache
