@@ -43,9 +43,10 @@
 }
 .pad {
     margin: 0;
-    padding: 0;
-    border: solid rgba(0,0,0,0);
-    border-width: 10px 15px;
+    padding: 10px 15px;
+    border: none;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
     box-sizing: border-box;
 }
 
