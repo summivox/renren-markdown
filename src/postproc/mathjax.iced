@@ -8,10 +8,11 @@ postproc/mathjax
 #   2. Pass down for rendering
 #   3. Callback up for rasterization
 
-$(PACKED_HTML['mathjax-loadscript.html']).appendTo(document.head)
-$dummy = $(PACKED_HTML['mathjax-dummy.html']).appendTo(document.body)
+$ ->
+  $(PACKED_HTML['mathjax-loadscript.html']).appendTo(document.head)
 
 util.pollUntil 250, (-> ui.inited), ->
+  $dummy = $(PACKED_HTML['mathjax-dummy.html']).appendTo(document.body)
 
   # sequence number
   n = 0
