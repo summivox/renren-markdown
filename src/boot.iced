@@ -3,7 +3,11 @@ boot
 !###
 
 $ ->
-  markdown.init()
+  # TODO: load settings
   tinymce.init()
-  ui.init()
   cron.init()
+  await
+    markdown.init defer()
+    ui.init defer()
+    postproc.init defer()
+  ui.listen()

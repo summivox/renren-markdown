@@ -34,6 +34,7 @@ markdown.setCss = (cssText, cb) ->
     cb?()
 
 markdown.inited = false
-markdown.init = ->
+markdown.init = (cb) ->
   markdown.setCss PACKED_CSS['markdown.css'], ->
     markdown.inited = true
+    cb?()

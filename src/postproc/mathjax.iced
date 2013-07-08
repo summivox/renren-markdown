@@ -2,16 +2,18 @@
 postproc/mathjax
 !###
 
-
 # postproc async process:
 #   1. Copy math to dummy container
 #   2. Pass down for rendering
 #   3. Callback up for rasterization
 
-$ ->
-  $(PACKED_HTML['mathjax-loadscript.html']).appendTo(document.head)
+# MathJax loads rather slowly, but is independent from other processes,
+# so we may load it immediately after page loads
+$ -> $(PACKED_HTML['mathjax-loadscript.html']).appendTo(document.head)
 
-util.pollUntil 250, (-> ui.inited), ->
+postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
+
+  # create dummy container
   $dummy = $(PACKED_HTML['mathjax-dummy.html']).appendTo(document.body)
 
   # sequence number
@@ -25,7 +27,7 @@ util.pollUntil 250, (-> ui.inited), ->
   cache = []
 
   # step 1
-  postproc.register 'mathjax', "script[type^='math/tex']", (el) ->
+  handler = (el) ->
     seq = ++n
     tag = getTag(seq)
     isDisplay = el.type.match /display/
@@ -104,3 +106,5 @@ util.pollUntil 250, (-> ui.inited), ->
 
       # TODO:
       #   cache
+
+  return handler

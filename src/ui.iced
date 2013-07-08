@@ -5,7 +5,7 @@ ui
 ui = {}
 
 ui.inited = false
-ui.init = ->
+ui.init = (cb) ->
   ui.cssClear = markdown.cssClearText
 
   # construct UI HTML & CSS
@@ -32,18 +32,19 @@ ui.init = ->
     @previewBody = @previewDoc.body
     @commit = @mainDoc.getElementById 'commit'
 
-    # FIXME: better editor open button
     @open = $(PACKED_HTML['ui-button.html']).prependTo('#title_bg')[0]
-
-  )(defer())
-
-  # hook up events
-  ui.el.open.addEventListener 'click', (e)-> process.open()
-  ui.el.area.addEventListener 'input', (e)-> cron.trig()
-  ui.el.commit.addEventListener 'click', (e)-> process.commit()
+    @open.style.opacity = 0.2 # mark as inactive
+  )(defer()) # await ui.el
 
   ui.inited = true
   ui.active = false
+  cb?() # ui.init
+
+ui.listen = ->
+  ui.el.open.style.opacity = 1 # active
+  ui.el.open.addEventListener 'click', (e) -> process.open()
+  ui.el.area.addEventListener 'input', (e) -> cron.trig()
+  ui.el.commit.addEventListener 'click', (e) -> process.commit()
 
 ui.show = (cb) ->
   await $(ui.el.loader).fadeIn 500, defer()
