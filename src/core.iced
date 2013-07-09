@@ -162,12 +162,13 @@ core.spanify = do ->
 do ->
   tag = 'http://dummy/$rrmd$'
 
-  core.embed = (s) ->
-    """<span style="display:none;">
-      <br/> == begin renren-markdown source ==
-      <br/> <span style="background-image:url('#{tag}')">#{util.str_to_b64(s)}</span>
-      <br/> == end renren-markdown source ==
-    </span>"""
+  core.embed = (s) -> """
+    <span style="display:none;"><br/>
+      <br/>== powered by renren-markdown ==
+      <br/><span style="background-image:url('#{tag}')">#{util.str_to_b64(s)}</span>
+      <br/>
+    </span>
+  """
 
   core.unembed = (h) ->
     h = h?.trim()
