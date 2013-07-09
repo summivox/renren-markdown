@@ -209,7 +209,7 @@ module.exports = (grunt) ->
         'build/metadata.js'
         'build/aio.js'
       ]
-      dest: 'dist/gm/renren-markdown.user.js'
+      dest: "dist/gm/#{@pkg.name}.user.js"
     grunt.registerTask 'gm', [
       'template:gm'
       'concat:gm'

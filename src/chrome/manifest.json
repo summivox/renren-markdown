@@ -13,9 +13,9 @@
           [ "aio.js"
           ]
       , "matches":
-          [ "http://blog.renren.com/blog/*Blog*"
-          , "http://blog.renren.com/blog/*edit*"
-          , "http://blog.renren.com/*Entry*"
+          [ "*://blog.renren.com/blog/*Blog*"
+          , "*://blog.renren.com/blog/*edit*"
+          , "*://blog.renren.com/*Entry*"
           ]
       , "run_at": "document_idle"
       }
