@@ -69,6 +69,6 @@ util.launchFullScreen = (el) ->
 
 util.cancelFullScreen = ->
   switch
-    when document.cancelFullScreen then document.cancelFullScreen()
-    when document.mozCancelFullScreen then document.mozCancelFullScreen()
-    when document.webkitCancelFullScreen then document.webkitCancelFullScreen()
+    when document.cancelFullScreen then window.top.document.cancelFullScreen()
+    when document.mozCancelFullScreen then window.top.document.mozCancelFullScreen()
+    when document.webkitCancelFullScreen then window.top.document.webkitCancelFullScreen()

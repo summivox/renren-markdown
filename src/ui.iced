@@ -35,9 +35,10 @@ ui.init = (cb) ->
     @open = $(PACKED_HTML['ui-button.html']).prependTo('#title_bg')[0]
     @open.style.opacity = 0.2 # mark as inactive
   )(defer()) # await ui.el
-  
+
   # fullscreen helper
   util.injectFunction document, '$rrmd$util$launchFullScreen', util.launchFullScreen
+  util.injectFunction ui.el.mainDoc, '$rrmd$util$cancelFullScreen', util.cancelFullScreen
   util.injectScript document, ->
     ###!
     rrmd.ui (injected)
@@ -56,8 +57,7 @@ ui.listen = ->
   ui.el.commit.addEventListener 'click', (e) -> process.commit()
 
 ui.show = (cb) ->
-  # util.launchFullScreen ui.el.loader
-  await $(ui.el.loader).fadeIn 500, defer()
+  await $(ui.el.loader).fadeIn 250, defer()
   $('#container').hide()
   ui.active = true
   cb?()
@@ -65,8 +65,7 @@ ui.show = (cb) ->
 ui.hide = (cb) ->
   ui.active = false
   $('#container').show()
-  await $(ui.el.loader).fadeOut 500, defer()
-  util.cancelFullScreen()
+  await $(ui.el.loader).fadeOut 250, defer()
   cb?()
 
 ui.getSource = -> ui.el.area.value
