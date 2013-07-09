@@ -37,7 +37,7 @@ ui.init = (cb) ->
   )(defer()) # await ui.el
   
   # fullscreen helper
-  util.injectFunction '$rrmd$util$launchFullScreen', util.launchFullScreen
+  util.injectFunction document, '$rrmd$util$launchFullScreen', util.launchFullScreen
   util.injectScript document, ->
     ###!
     rrmd.ui (injected)
