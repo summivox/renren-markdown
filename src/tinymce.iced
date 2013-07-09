@@ -27,16 +27,16 @@ tinymce.call = do ->
       cb? err, null
 
 tinymce.init = ->
-  util.injectFunction document, 'pollUntil', util.pollUntil
-  util.injectScript document, ->
+  util.injectFunction document, '$rrmd$util$pollUntil', util.pollUntil
+  util.injectScript document, -> do ->
     ###!
     rrmd.tinymce (injected)
     !###
 
     # bootstrap
     editor = null
-    pollUntil 500, (-> editor = window.tinymce?.editors?[0]), ->
-      window.$rrmd$tinymce = editor
+    $rrmd$util$pollUntil 500, (-> editor = window.tinymce?.editors?[0]), ->
+      window.$rrmd$pp$tinymce = editor
       init()
 
     init = ->

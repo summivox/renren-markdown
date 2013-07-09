@@ -57,3 +57,18 @@ util.setScrollRatio = (el, ratio) ->
 util.pollUntil = (period, check, cb) ->
   if check instanceof Function && cb instanceof Function
     iid = setInterval (-> if check() then cb clearInterval iid), period # pun intended
+
+# go fullscreen
+# http://davidwalsh.name/fullscreen
+util.launchFullScreen = (el) ->
+  switch
+    when el.requestFullScreen then el.requestFullScreen()
+    when el.mozRequestFullScreen then el.mozRequestFullScreen()
+    when el.webkitRequestFullScreen then el.webkitRequestFullScreen()
+    else debugger # FIXME
+
+util.cancelFullScreen = ->
+  switch
+    when document.cancelFullScreen then document.cancelFullScreen()
+    when document.mozCancelFullScreen then document.mozCancelFullScreen()
+    when document.webkitCancelFullScreen then document.webkitCancelFullScreen()
