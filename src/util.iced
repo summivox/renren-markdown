@@ -14,8 +14,28 @@ util.dquote_to_squote = (s) -> s.replace /"/g, "'"
 # safely unescape javascript string representation
 util.jsStr = (s) ->
   if !(s = s?.trim()) then return null
-  try JSON.parse util.squote_to_dquote s
-  catch e then null
+  switch
+    when m = s.match /^"(.*)"$/
+      # double quoted, feed to JSON
+      try return JSON.parse s
+      catch e then return null
+    when m = s.match /^'(.*)'$/
+      # single quoted, parse by hand (ignoring irregularities)
+      # http://blogs.learnnowonline.com/blog/bid/191997/Escape-Sequences-in-String-Literals-Using-JavaScript
+      s = m[1]
+      hex_to_char = ($0, $1) -> String.fromCharCode parseInt($1, 16)
+      loop
+        s2 = s
+          .replace(/\\n/, '\n') # \n
+          .replace(/\\r/, '\r') # \r
+          .replace(/\\t/, '\t') # \t
+          .replace(/\\x([0-9A-Fa-f]{2})/, hex_to_char) # \xHH
+          .replace(/\\u([0-9A-Fa-f]{4})/, hex_to_char) # \xHHHH
+          .replace(/\\([^nrtxu0])/, '$1') # \whatever
+        if s2 == s then break
+        s = s2
+      return s
+    else return null
 
 # string <=> base64
 util.str_to_b64 = (str) -> window.btoa unescape encodeURIComponent str
