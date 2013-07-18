@@ -27,7 +27,7 @@ postproc.register 'gist', 'a', (autocb) ->
       \)
     \s*$
     ///mg
-  cssRe = /link\s*href=\"([^"]*)\"/
+  cssRe = /link.*href=\"([^"]*)\"/
   parse = (js) ->
     nret = {cssUrl: null, cont: null}
 
