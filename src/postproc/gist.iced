@@ -68,7 +68,9 @@ postproc.register 'gist', 'a', (autocb) ->
   if !inited
     # TODO: report error
     console.log 'gist: fail to init'
-    return (-> console.log 'gist: dead')
+    return ->
+      console.log 'gist: dead'
+      {changed: false}
 
   return handler = (el) ->
     if el.href.trim() == el.innerHTML.trim() && m = el.href.match urlRe
