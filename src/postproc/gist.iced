@@ -86,8 +86,11 @@ postproc.register 'gist', 'a', (autocb) ->
             if !cont then return false
 
             $cont = $(cont)
-            el3 = core.spanify core.inlineCss $cont[0], cssRules
 
+            # workaround: line numbers should not wrap
+            $cont.find('.gist-data').each -> @style.whiteSpace||='nowrap'
+
+            el3 = core.spanify core.inlineCss $cont[0], cssRules
             $(el2).replaceWith(el3)
             cache[id] = el3.cloneNode(true)
             return true
