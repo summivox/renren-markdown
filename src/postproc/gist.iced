@@ -18,29 +18,17 @@ postproc.register 'gist', 'a', (autocb) ->
   cssText = ""
   cssRules = null
 
-  # safe embedded gist (javascript) parser
-  jsRe = -> # use new Regexp instance each pass
-    ///
-    ^\s*
-      document\.write\(
-        (.*)
-      \)
-    \s*$
-    ///mg
-  cssRe = /link.*href=\"([^"]*)\"/
-  parse = (js) ->
-    nret = {cssUrl: null, cont: null}
-
-    re = jsRe()
-
-    cssUrlWrap = util.jsStr(re.exec(js)?[1])
-    if !cssUrlWrap then return nret
-    cssUrl = cssRe.exec(cssUrlWrap)?[1]
-    if !cssUrl then return nret
-    cont = util.jsStr(re.exec(js)?[1])
-    if !cont then return nret
-
-    {cssUrl, cont}
+  # extract information from js
+  getCssUrl = (js) ->
+    if m = js.match /link.*href=\"([^"]*)\"/
+      return m[1]
+    else return null
+  getContent = do ->
+    n = 0
+    getContent = (js, cb) ->
+      ifr = core.makeIframe "rrmd-pp-gist-#{++n}", (doc) ->
+        doc.write """<script>#{js}</script>"""
+        cb? doc.body.innerHTML
 
   # cache[id] = clone of fully processed gist DOM
   cache = {}
@@ -52,7 +40,7 @@ postproc.register 'gist', 'a', (autocb) ->
       await xhr.get testUrl, defer(err, testJs)
       if err || !testJs then return false
 
-      {cssUrl} = parse testJs
+      cssUrl = getCssUrl testJs
       if !cssUrl then return false
 
       await xhr.get cssUrl, defer(err, _cssText)
@@ -84,7 +72,7 @@ postproc.register 'gist', 'a', (autocb) ->
             await xhr.get makeUrl(id), defer(err, js)
             if err || !js then return false
 
-            {cont} = parse js
+            await getContent js, defer(cont)
             if !cont then return false
 
             $cont = $(cont)

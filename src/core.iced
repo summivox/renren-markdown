@@ -4,6 +4,13 @@ core
 
 core = {}
 
+# make invisible iframe and insert into body
+core.makeIframe = (id, cb) ->
+  ifr = $("""<iframe id="#{id}" style="position:fixed;width:0;height:0;" />""").appendTo('body')[0]
+  doc = ifr.contentDocument
+  $(doc).ready cb? doc
+  ifr
+
 # get augmented css rules from css source
 # "augmented":
 #   comma-separated selectors with same body => multiple rules
@@ -38,11 +45,12 @@ core.getAugCssRules = do ->
         style="position:fixed;width:0;height:0;"
       />"""
 
-  getAugCssRules = (css, cb) ->
-    doc = $(iframe()).appendTo('body')[0].contentDocument
-    $(doc).ready ->
-      doc.write """<style type="text/css">#{css}</style>"""
-      cb? aug util.arrayize doc.styleSheets[0].cssRules
+  getAugCssRules = do ->
+    n = 0
+    getAugCssRules = (css, cb) ->
+      ifr = core.makeIframe "rrmd-cssrules-#{n++}", (doc) ->
+        doc.write """<style type="text/css">#{css}</style>"""
+        cb? aug util.arrayize doc.styleSheets[0].cssRules
 
 core.inlineCss = do ->
   # workaround: non-standard entries
