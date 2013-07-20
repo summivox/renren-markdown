@@ -24,23 +24,38 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
   tran = []
 
   # cache
-  cache = []
+  cache = new Lru 100 # TODO: settable
+
+  # image from dataUrl
+  getImg = (dataUrl, isDisplay, cached) ->
+    img = document.createElement 'img'
+    img.src = dataUrl
+    # display-mode math: add back centering
+    if isDisplay
+      $(img).wrap('<span style="display:block;width:100%;text-align:center">').parent()[0]
+    else
+      img
 
   # step 1
   handler = (el) ->
-    seq = ++n
-    tag = getTag(seq)
     isDisplay = el.type.match /display/
-    el.classList.add tag
-    {
-      changed: true
-      async: (el2, cb) ->
-        srcEl = $(el2).clone().appendTo($dummy)[0]
-        tran[seq] = {el2, cb, isDisplay}
-        window.postMessage {
-          _rrmd_pp_mathjax: seq
-        }, window.location.origin
-    }
+    if dataUrl = cache.get el.textContent.toString().trim()
+      {
+        replaceWith: getImg dataUrl, isDisplay, true
+      }
+    else
+      seq = ++n
+      tag = getTag(seq)
+      el.classList.add tag
+      {
+        changed: true
+        async: (el2, cb) ->
+          srcEl = $(el2).clone().appendTo($dummy)[0]
+          tran[seq] = {el2, cb, isDisplay}
+          window.postMessage {
+            _rrmd_pp_mathjax: seq
+          }, window.location.origin
+      }
 
   # step 2
   util.injectFunction document, '$rrmd$pp$mathjax$getTag', getTag
@@ -78,14 +93,14 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
 
     rendered = document.querySelector d.renderedSel
     if !(rendered instanceof Element)
-      # console.log "mathjax: can't find rendered math"
+      console.log "mathjax: can't find rendered math"
       tran[seq].cb?()
       delete tran[seq]
       return
 
     core.rasterize rendered, (dataUrl) ->
       if !dataUrl
-        # console.log 'mathjax: fail to rasterize'
+        console.log 'mathjax: fail to rasterize'
         return
 
       # console.log 'mathjax: rasterized: ' + dataUrl.length
@@ -95,18 +110,10 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
       $(rendered).parentsUntil($dummy).last().remove()
       $('.' + getTag(seq)).remove()
 
-      img = document.createElement 'img'
-      img.src = dataUrl
-      $(tran[seq].el2).replaceWith(img)
-
-      # display-mode math: add back centering
-      if tran[seq].isDisplay
-        $(img).wrap('<span style="display:block;width:100%;text-align:center">')
-
-      tran[seq].cb?()
+      {el2, isDisplay, cb} = tran[seq]
+      $(el2).replaceWith(getImg(dataUrl, isDisplay))
+      cache.set el2.textContent.toString().trim(), dataUrl
+      cb?()
       delete tran[seq]
-
-      # TODO:
-      #   cache
 
   return handler
