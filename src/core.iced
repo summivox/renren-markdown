@@ -4,54 +4,6 @@ core
 
 core = {}
 
-# make invisible iframe and insert into body
-core.makeIframe = (id, cb) ->
-  ifr = $("""<iframe id="#{id}" style="position:fixed;width:0;height:0;" />""").appendTo('body')[0]
-  doc = ifr.contentDocument
-  $(doc).ready cb? doc
-  ifr
-
-# get augmented css rules from css source
-# "augmented":
-#   comma-separated selectors with same body => multiple rules
-#   rules sorted by specificity (high -> low) then index (last -> first)
-#   (later rules don't override earlier rules unless `!important`)
-core.getAugCssRules = do ->
-  # augment css rules
-  aug = (rules) ->
-    ret = []
-    idx = 0
-    rules.forEach (r) ->
-      for {selector, specificity} in getSpecificity r.selectorText
-        idx = ret.push {
-          selectorText: selector
-          style: r.style
-          specificity
-          idx
-        }
-      return # forEach
-    ret.sort (a, b) ->
-      for i in [0..2]
-        if (c = b.specificity[i] - a.specificity[i])
-          return c
-      return b.idx - i.idx # stable sort
-
-  # use iframe to get original css rules
-  iframe = do ->
-    n = 0
-    iframe = ->
-      """<iframe
-        id="rrmd-cssrules-#{n++}"
-        style="position:fixed;width:0;height:0;"
-      />"""
-
-  getAugCssRules = do ->
-    n = 0
-    getAugCssRules = (css, cb) ->
-      ifr = core.makeIframe "rrmd-cssrules-#{n++}", (doc) ->
-        doc.write """<style type="text/css">#{css}</style>"""
-        cb? aug util.arrayize doc.styleSheets[0].cssRules
-
 core.inlineCss = do ->
   # workaround: non-standard entries
   valid = (s) -> s && s[0] != '-'

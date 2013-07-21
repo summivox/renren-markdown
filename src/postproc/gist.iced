@@ -19,16 +19,16 @@ postproc.register 'gist', 'a', (autocb) ->
   cssRules = null
 
   # extract information from js
-  getCssUrl = (js) ->
-    if m = js.match /link.*href=\"([^"]*)\"/
-      return m[1]
-    else return null
-  getContent = do ->
+  parse = do ->
     n = 0
-    getContent = (js, cb) ->
-      ifr = core.makeIframe "rrmd-pp-gist-#{++n}", (doc) ->
+    parse = (js, cb) ->
+      util.makeIframe "rrmd-pp-gist-#{++n}", (doc) ->
+        doc.open()
         doc.write """<script>#{js}</script>"""
-        cb? doc.body.innerHTML
+        doc.close()
+        cssUrl = doc.querySelector('link[href]').href
+        cont = doc.body.innerHTML
+        cb? cssUrl, cont
 
   # cache[id] = clone of fully processed gist DOM
   cache = {}
@@ -40,15 +40,13 @@ postproc.register 'gist', 'a', (autocb) ->
       await xhr.get testUrl, defer(err, testJs)
       if err || !testJs then return false
 
-      cssUrl = getCssUrl testJs
-      if !cssUrl then return false
+      await parse testJs, defer(cssUrl, cont)
+      if !cont then return false
 
       await xhr.get cssUrl, defer(err, _cssText)
       if err || !_cssText then return false
       cssText = _cssText # use the one in the closure
-
-      await core.getAugCssRules cssText, defer(_cssRules)
-      cssRules = _cssRules # ditto
+      cssRules = css.aug css.parse cssText
 
       return true
     )(defer(inited))
@@ -72,7 +70,7 @@ postproc.register 'gist', 'a', (autocb) ->
             await xhr.get makeUrl(id), defer(err, js)
             if err || !js then return false
 
-            await getContent js, defer(cont)
+            await parse js, defer(cssUrl, cont)
             if !cont then return false
 
             $cont = $(cont)

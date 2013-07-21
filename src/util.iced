@@ -41,6 +41,13 @@ util.jsStr = (s) ->
 util.str_to_b64 = (str) -> window.btoa unescape encodeURIComponent str
 util.b64_to_str = (b64) -> decodeURIComponent escape window.atob b64
 
+# make invisible iframe and insert into body
+util.makeIframe = (doc, id, cb) ->
+  ifr = $("""<iframe id="#{id}" style="position:fixed;width:0;height:0;" />""").appendTo(doc.body)[0]
+  idoc = ifr.contentDocument
+  $(idoc).ready cb? idoc
+  ifr
+
 # add script tag to document
 #   script => run
 #   function => IIFE
