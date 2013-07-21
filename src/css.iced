@@ -6,7 +6,7 @@ css = {}
 
 css.inited = false
 css.init = (autocb) ->
-  await util.makeIframe 'rrmd-css', defer(doc)
+  await util.makeIframe document, 'rrmd-css', defer(doc)
   css.doc = doc
   css.inited = true
 

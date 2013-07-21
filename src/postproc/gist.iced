@@ -22,7 +22,7 @@ postproc.register 'gist', 'a', (autocb) ->
   parse = do ->
     n = 0
     parse = (js, cb) ->
-      util.makeIframe "rrmd-pp-gist-#{++n}", (doc) ->
+      util.makeIframe document, "rrmd-pp-gist-#{++n}", (doc) ->
         doc.open()
         doc.write """<script>#{js}</script>"""
         doc.close()
