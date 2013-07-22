@@ -10,18 +10,23 @@ Kisume = do ->
     el.textContent = script
     doc.head.appendChild el
 
-  # inject coffee-script shims (good for ~1.6.0)
-  $coffee = `function(doc){
-      s = '';
-      try{s += 'var __hasProp = ' + __hasProp + ';\n';}catch(e){}; //caveat: native code
-      try{s += 'var __extends = ' + __extends + ';\n';}catch(e){};
-      try{s += 'var __slice   = ' + __slice   + ';\n';}catch(e){};
-      try{s += 'var __bind    = ' + __bind    + ';\n';}catch(e){};
-      try{s += 'var __indexOf = ' + __indexOf + ';\n';}catch(e){};
-      $(doc, s);
-  }`
+  # coffee-script shims (~1.6.0)
+  # recompile this script with newer version to get full set of shims
+  COFFEE_SHIM = """
+    var
+      __hasProp = {}.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+      __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+      __slice = [].slice,
+      __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  """
+  _dummy = (args...) ->
+    x in args
+    v for own k, v of obj
+    class X extends Y
+      bound: => null
 
-  lib = ->
+  LIB = ->
     ###!
     kisume: bottom library
     !###
@@ -66,13 +71,13 @@ Kisume = do ->
               x = @env(o.ns)
               for {name, value} in o.v
                 x[name] = value
-              @_A_up n, {type: 'set', err: null}
+              @_A_up n, {type: 'set'}
             when 'get'
               x = @env(o.ns)
               ret = {}
               for name in o.names
                 ret[name] = x[name]
-              @_A_up n, {type: 'get', err: null, ret}
+              @_A_up n, {type: 'get', ret}
             when 'run'
               if o.iife?
                 f = @_iife[o.iife]
@@ -81,11 +86,11 @@ Kisume = do ->
               if !f
                 @_A_up n, {type: 'run', err: true}
               else if o.async
-                f?.call @env, o.args..., (err, rets...) ->
+                f?.call @env, o.args..., (err, rets...) =>
                   @_A_up n, {type: 'run', async: true, err, rets}
               else
                 ret = f?.apply @env, o.args
-                @_A_up n, {type: 'run', async: false, err: null, ret}
+                @_A_up n, {type: 'run', async: false, ret}
         catch e
           @_A_up n, {type: o.type, async: false, err: @_err(e)}
 
@@ -115,8 +120,7 @@ Kisume = do ->
       @_init_cb = cb
       @W.addEventListener 'message', @_listener
       if !(@D.body.dataset['kisume'])?
-        $coffee @D
-        $ @D, "(#{lib})();"
+        $ @D, "#{COFFEE_SHIM};(#{LIB})();"
         @D.body.dataset['kisume'] = true
 
     set: (ns, o, cb) ->
@@ -182,7 +186,7 @@ Kisume = do ->
         when 'init'
           @_init_cb this
         when 'pub'
-          null
+          null #TODO
 
     _A_up: (n, o) ->
       cb = @_tran[n]

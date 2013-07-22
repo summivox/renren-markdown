@@ -33,12 +33,11 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
     else
       img
 
-  await Kisume window, defer(kisume)
-  await kisume.set 'mathjax', {
+  await window.kisume.set 'mathjax', {
     render: (tag, cb) ->
       srcEl = document.getElementsByClassName(tag)[0]
       MathJax.Hub.Queue(
-        ['Typeset', MathJax.Hub, srcEl, -> cb null, @mathjax.getRenderedSel srcEl]
+        ['Typeset', MathJax.Hub, srcEl, => cb null, @mathjax.getRenderedSel srcEl]
       )
     getRenderedSel: (srcEl) ->
       j = window.MathJax.Hub.getJaxFor(srcEl)
@@ -59,7 +58,7 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
         changed: true
         async: (el2, cb) ->
           srcEl = $(el2).clone().appendTo($dummy)[0]
-          kisume.runAsync 'mathjax', 'render', (err, renderedSel) ->
+          window.kisume.runAsync 'mathjax', 'render', tag, (err, renderedSel) ->
             if err?
               console.log 'mathjax: render error'
               console.log err
@@ -84,6 +83,6 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
               cache.set el2.textContent.toString().trim(), dataUrl
               cb?()
               return # core.rasterize
-            return # kisume.runAsync
+            return # window.kisume.runAsync
           return # async
       }
