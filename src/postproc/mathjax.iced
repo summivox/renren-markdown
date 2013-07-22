@@ -56,33 +56,28 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
       el.classList.add tag
       {
         changed: true
-        async: (el2, cb) ->
+        async: (el2, autocb) ->
           srcEl = $(el2).clone().appendTo($dummy)[0]
-          window.kisume.runAsync 'mathjax', 'render', tag, (err, renderedSel) ->
-            if err?
-              console.log 'mathjax: render error'
-              console.log err
-              return
+          await window.kisume.runAsync 'mathjax', 'render', tag, defer(err, renderedSel)
+          if err?
+            console.log 'mathjax: render error'
+            console.error err
+            return
+          rendered = document.querySelector renderedSel
+          if !(rendered instanceof Element)
+            console.error "mathjax: can't find rendered math"
+            return
 
-            rendered = document.querySelector renderedSel
-            if !(rendered instanceof Element)
-              console.log "mathjax: can't find rendered math"
-              cb?()
-              return
+          await core.rasterize rendered, defer(dataUrl)
+          if !dataUrl
+            console.error 'mathjax: rasterize error'
+            return
 
-            core.rasterize rendered, (dataUrl) ->
-              if !dataUrl
-                console.log 'mathjax: rasterize error'
-                return
+          # delete associated elements from dummy
+          $(rendered).parentsUntil($dummy).last().remove()
+          $('.' + getTag(seq)).remove()
 
-              # delete associated elements from dummy
-              $(rendered).parentsUntil($dummy).last().remove()
-              $('.' + getTag(seq)).remove()
-
-              $(el2).replaceWith(getImg(dataUrl, isDisplay))
-              cache.set el2.textContent.toString().trim(), dataUrl
-              cb?()
-              return # core.rasterize
-            return # window.kisume.runAsync
-          return # async
+          $(el2).replaceWith(getImg(dataUrl, isDisplay))
+          cache.set el2.textContent.toString().trim(), dataUrl
+          return
       }
