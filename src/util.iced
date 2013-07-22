@@ -61,24 +61,24 @@ util.injectScript = (doc, x) ->
 # inject function into global namespace
 util.injectFunction = (doc, name, f) ->
   if f instanceof Function
-    util.injectScript doc, ";var #{name} = #{f.toString()};"
+    @injectScript doc, ";var #{name} = #{f.toString()};"
 
 # scrolling
 util.canScroll = (el) -> !! el?.scrollHeight?
 
 util.scrollRange = (el) ->
-  if util.canScroll(el) then return null
+  if @canScroll(el) then return null
   el.scrollHeight - el.clientHeight
 
 util.scrollRatio = (el) ->
-  if util.canScroll(el) then return null
-  el.scrollTop / util.scrollRange(el)
+  if @canScroll(el) then return null
+  el.scrollTop / @scrollRange(el)
 
 util.setScrollRatio = (el, ratio) ->
-  if util.canScroll(el) then return null
+  if @canScroll(el) then return null
   if !isFinite(ratio) then return null
   ratio = Math.min(Math.max(ratio, 0), 1)
-  el.scrollTop = ratio * util.scrollRange(el)
+  el.scrollTop = ratio * @scrollRange(el)
 
 # periodically do check until true, then callback
 util.pollUntil = (period, check, cb) ->

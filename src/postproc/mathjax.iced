@@ -33,11 +33,11 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
     else
       img
 
-  await window.kisume.set 'mathjax', {
+  await window.kisume.set 'mathjax', [], {
     render: (tag, cb) ->
       srcEl = document.getElementsByClassName(tag)[0]
       MathJax.Hub.Queue(
-        ['Typeset', MathJax.Hub, srcEl, => cb null, @mathjax.getRenderedSel srcEl]
+        ['Typeset', MathJax.Hub, srcEl, => cb null, @getRenderedSel srcEl]
       )
     getRenderedSel: (srcEl) ->
       j = window.MathJax.Hub.getJaxFor(srcEl)

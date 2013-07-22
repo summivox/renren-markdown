@@ -31,11 +31,11 @@ module.exports = (grunt) ->
   # template
   grunt.registerMultiTask 'template', ->
     for x in @files
-      src = x.src[0] # FIXME: support one src only
-      dest = x.dest
-      cont = grunt.template.process grunt.file.read(src, encoding: 'utf-8')
+      cont = ''
+      for src in x.src
+        cont += grunt.template.process grunt.file.read(src, encoding: 'utf-8')
       cont = cont.replace(/\r\n/g, '\n')
-      grunt.file.write(dest, cont, encoding: 'utf-8')
+      grunt.file.write(x.dest, cont, encoding: 'utf-8')
 
 
   ############
@@ -53,7 +53,7 @@ module.exports = (grunt) ->
         bare: true
     @uglify =
       options:
-        preserveComments: 'some'
+        preserveComments: 'none' # 'some'
     @cssmin = {}
     @svgmin = {}
     @pack = {}
@@ -64,13 +64,23 @@ module.exports = (grunt) ->
 
     # minify and join libraries
     @uglify.lib =
+      options:
+        mangle: false
       files: [
         {
           expand: true
           cwd: 'lib/'
-          src: '*.js'
+          src: ['*.js', '!*.min.js']
           dest: 'build/lib/'
-          ext: '.min.js'
+        }
+      ]
+    @copy.lib =
+      files: [
+        {
+          expand: true
+          cwd: 'lib/'
+          src: '*.min.js'
+          dest: 'build/lib/'
         }
       ]
     @concat.lib =
@@ -78,6 +88,7 @@ module.exports = (grunt) ->
       dest: 'build/lib.js'
     grunt.registerTask 'lib', [
       'uglify:lib'
+      'copy:lib'
       'concat:lib'
     ]
 

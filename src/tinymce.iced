@@ -7,24 +7,22 @@ tinymce = {}
 tinymce.inited = false
 tinymce.init = (autocb) ->
   await
-    window.kisume.set 'util', util, defer(err1)
-    window.kisume.set 'tinymce', {
+    window.kisume.set 'tinymce', ['util'], {
       editor: null
-      setContent: (s) -> @tinymce.editor.setContent(s) ; true
-      getContent:     -> @tinymce.editor.getContent()
-    }, defer(err2)
-  if err1 || err2
-    console.log err1
-    console.log err2
+      setContent: (s) -> @editor.setContent(s) ; true
+      getContent:     -> @editor.getContent()
+    }, defer(err)
+  if err
+    console.error err
     return false
   await window.kisume.runAsync ((cb) ->
     editor = null
-    @util.pollUntil 500, (-> editor = window.tinymce?.editors?[0]), ->
-      window.kisume.env.tinymce.editor = editor
+    @util.pollUntil 500, (-> editor = window.tinymce?.editors?[0]), =>
+      @tinymce.editor = editor
       cb()
   ), defer(err, ret)
   if err
-    console.log err
+    console.error err
     return false
 
   tinymce.inited = true
