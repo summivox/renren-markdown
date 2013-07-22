@@ -20,9 +20,6 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
   n = 0
   getTag = (seq) -> "rrmd-pp-mathjax-#{seq}"
 
-  # transaction
-  tran = []
-
   # cache
   cache = new Lru 100 # TODO: settable
 
@@ -36,7 +33,18 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
     else
       img
 
-  # step 1
+  await Kisume window, defer(kisume)
+  await kisume.set 'mathjax', {
+    render: (tag, cb) ->
+      srcEl = document.getElementsByClassName(tag)[0]
+      MathJax.Hub.Queue(
+        ['Typeset', MathJax.Hub, srcEl, -> cb null, @mathjax.getRenderedSel srcEl]
+      )
+    getRenderedSel: (srcEl) ->
+      j = window.MathJax.Hub.getJaxFor(srcEl)
+      "\##{j.inputID}-Frame span.math"
+  }, defer(err)
+
   handler = (el) ->
     isDisplay = el.type.match /display/
     if dataUrl = cache.get el.textContent.toString().trim()
@@ -51,69 +59,31 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
         changed: true
         async: (el2, cb) ->
           srcEl = $(el2).clone().appendTo($dummy)[0]
-          tran[seq] = {el2, cb, isDisplay}
-          window.postMessage {
-            _rrmd_pp_mathjax: seq
-          }, window.location.origin
+          kisume.runAsync 'mathjax', 'render', (err, renderedSel) ->
+            if err?
+              console.log 'mathjax: render error'
+              console.log err
+              return
+
+            rendered = document.querySelector renderedSel
+            if !(rendered instanceof Element)
+              console.log "mathjax: can't find rendered math"
+              cb?()
+              return
+
+            core.rasterize rendered, (dataUrl) ->
+              if !dataUrl
+                console.log 'mathjax: rasterize error'
+                return
+
+              # delete associated elements from dummy
+              $(rendered).parentsUntil($dummy).last().remove()
+              $('.' + getTag(seq)).remove()
+
+              $(el2).replaceWith(getImg(dataUrl, isDisplay))
+              cache.set el2.textContent.toString().trim(), dataUrl
+              cb?()
+              return # core.rasterize
+            return # kisume.runAsync
+          return # async
       }
-
-  # step 2
-  util.injectFunction document, '$rrmd$pp$mathjax$getTag', getTag
-  util.injectScript document, -> do ->
-    ###!
-    rrmd.postproc/mathjax (injected)
-    !###
-
-    getTag = $rrmd$pp$mathjax$getTag
-    getRenderedSel = (srcEl) ->
-      j = MathJax.Hub.getJaxFor(srcEl)
-      "\##{j.inputID}-Frame span.math"
-
-    window.addEventListener 'message', (e) ->
-      # check validity of message
-      if !e? || e.origin != window.location.origin then return
-      if !(d = e.data)? || !(seq = d._rrmd_pp_mathjax)? then return
-      srcEl = document.getElementsByClassName(getTag(seq))[0]
-      MathJax.Hub.Queue(
-        ['Typeset', MathJax.Hub, srcEl, ->
-          # console.log 'mathjax: rendered'
-          # console.log srcEl.textContent
-          window.postMessage {
-            _rrmd_pp_mathjax_cb: seq
-            renderedSel: getRenderedSel srcEl
-          }, window.location.origin
-        ]
-      )
-
-  # step 3
-  window.addEventListener 'message', (e) ->
-    # check validity of message
-    if !e? || e.origin != window.location.origin then return
-    if !(d = e.data)? || !(seq = d._rrmd_pp_mathjax_cb)? then return
-
-    rendered = document.querySelector d.renderedSel
-    if !(rendered instanceof Element)
-      console.log "mathjax: can't find rendered math"
-      tran[seq].cb?()
-      delete tran[seq]
-      return
-
-    core.rasterize rendered, (dataUrl) ->
-      if !dataUrl
-        console.log 'mathjax: fail to rasterize'
-        return
-
-      # console.log 'mathjax: rasterized: ' + dataUrl.length
-      # console.log dataUrl
-
-      # delete associated elements from dummy
-      $(rendered).parentsUntil($dummy).last().remove()
-      $('.' + getTag(seq)).remove()
-
-      {el2, isDisplay, cb} = tran[seq]
-      $(el2).replaceWith(getImg(dataUrl, isDisplay))
-      cache.set el2.textContent.toString().trim(), dataUrl
-      cb?()
-      delete tran[seq]
-
-  return handler

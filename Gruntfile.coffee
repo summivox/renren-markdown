@@ -123,6 +123,7 @@ module.exports = (grunt) ->
     @coffee.main =
       options:
         join: true
+        # sourceMap: true
         runtime: 'window'
       files: [
         {src: 'src/*.{iced,coffee}', dest: 'build/main.js'}

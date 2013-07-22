@@ -4,57 +4,31 @@ tinymce
 
 tinymce = {}
 
-# bridge calls to the TinyMCE editor instance
-# example: tinymce.call 'setContent', '...', (err, ret) -> console.log ret
-tinymce.call = do ->
-  n = 0
-  call = (method, arg..., cb) ->
-    seq = ++n
-    window.addEventListener 'message', handler = (e) ->
-      # check validity of message
-      if !e? || e.origin != window.location.origin then return
-      if (d = e.data)?._rrmd_tinymce_cb == seq
-        cb? d.err, d.ret
-        window.removeEventListener 'message', handler
-    try
-      window.postMessage {
-        _rrmd_tinymce: seq
-        method, arg
-      }, window.location.origin
-    catch err
-      # TODO: error -> UI
-      console.log 'RRMD: tinymce.call error'
-      cb? err, null
-
-tinymce.init = ->
-  util.injectFunction document, '$rrmd$util$pollUntil', util.pollUntil
-  util.injectScript document, -> do ->
-    ###!
-    rrmd.tinymce (injected)
-    !###
-
-    # bootstrap
+tinymce.inited = false
+tinymce.init = (autocb) ->
+  await tinymce.kisume = Kisume window, defer(kisume)
+  await
+    kisume.set 'util', util, defer(err1)
+    kisume.set 'tinymce', {
+      editor: null
+      setContent: (s) -> @tinymce.editor.setContent(s) ; true
+      getContent:     -> @tinymce.editor.getContent()
+    }, defer(err2)
+  if err1 || err2
+    console.log err1
+    console.log err2
+    return false
+  await kisume.run (->
     editor = null
-    $rrmd$util$pollUntil 500, (-> editor = window.tinymce?.editors?[0]), ->
-      window.$rrmd$pp$tinymce = editor
-      init()
+    @util.pollUntil 500, (-> editor = window.tinymce?.editors?[0]), ->
+      window.kisume.env.tinymce.editor = editor
+  ), defer(err, ret)
+  if err
+    console.log err
+    return false
 
-    init = ->
-      window.addEventListener 'message', handler = (e) ->
-        # check validity of message
-        if !e? || e.origin != window.location.origin then return
-        if !(d = e.data)? || !(seq = d._rrmd_tinymce)? then return
+  tinymce.inited = true
 
-        # workaround: interference from @-mention
-        if editor.mention then editor.mention.disabled = true
-
-        # bridge the call
-        cb = (err, ret) ->
-          window.postMessage {
-            _rrmd_tinymce_cb: seq
-            err, ret
-          }, window.location.origin
-        try
-          cb null, editor[d.method].apply(editor, d.arg)
-        catch err
-          cb err, null
+# example: tinymce.call 'setContent', '...', (err, ret) -> console.log ret
+tinymce.call = (arg...) ->
+  tinymce.kisume.run 'tinymce', arg...
