@@ -31,7 +31,8 @@ process.commit = ->
   el = ui.getPreview()
   core.relayAllImg el
   core.spanify el
+  cont = censor el.innerHTML
   embed = core.embed md
   # TODO: extra steps
-  tinymce.call 'setContent', el.innerHTML + embed, (->)
+  tinymce.call 'setContent', cont + embed, (->)
   ui.hide()
