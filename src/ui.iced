@@ -54,7 +54,7 @@ do ->
   reflow = (autocb) ->
     o = ui.el.open
     o.style.float = 'left'
-    await setTimeout defer(), 1
+    await setTimeout defer(), 50
     o.style.float = 'none'
 
   ui.show = (cb) ->
