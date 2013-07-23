@@ -53,7 +53,7 @@ module.exports = (grunt) ->
         bare: true
     @uglify =
       options:
-        preserveComments: 'none' # 'some'
+        preserveComments: 'some'
     @cssmin = {}
     @svgmin = {}
     @pack = {}
