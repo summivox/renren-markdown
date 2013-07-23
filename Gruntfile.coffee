@@ -237,3 +237,9 @@ module.exports = (grunt) ->
     'chrome'
     'gm'
   ]
+
+  grunt.registerTask 'all', [
+    'clean'
+    'lib'
+    'default'
+  ]
