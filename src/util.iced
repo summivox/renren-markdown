@@ -48,21 +48,6 @@ util.makeIframe = (doc, id, cb) ->
   $(idoc).ready cb? idoc
   ifr
 
-# add script tag to document
-#   script => run
-#   function => IIFE
-util.injectScript = (doc, x) ->
-  el = doc.createElement 'script'
-  el.textContent = switch typeof x
-    when 'string' then x
-    when 'function' then "(#{x.toString()})();"
-  doc.head.appendChild el
-
-# inject function into global namespace
-util.injectFunction = (doc, name, f) ->
-  if f instanceof Function
-    @injectScript doc, ";var #{name} = #{f.toString()};"
-
 # scrolling
 util.canScroll = (el) -> !! el?.scrollHeight?
 

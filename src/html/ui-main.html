@@ -5,7 +5,7 @@
 </head>
 <body>
 <div id="wrap" class="full">
-    <input type="button" id="commit" value="commit" onclick="$rrmd$util$cancelFullScreen();"/>
+    <input type="button" id="commit" value="commit" onclick="KISUME.env('util').cancelFullScreen();return false;"/>
     <div id="left" class="pad">
         <textarea id="area" name="area" class="full"></textarea>
     </div>

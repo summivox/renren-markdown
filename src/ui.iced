@@ -36,15 +36,8 @@ ui.init = (cb) ->
     @open.style.opacity = 0.2 # mark as inactive
   )(defer()) # await ui.el
 
-  # fullscreen helper
-  util.injectFunction document, '$rrmd$util$launchFullScreen', util.launchFullScreen
-  util.injectFunction ui.el.mainDoc, '$rrmd$util$cancelFullScreen', util.cancelFullScreen
-  util.injectScript document, ->
-    ###!
-    rrmd.ui (injected)
-    !###
-    window.$rrmd$ui$fullscreen = ->
-      $rrmd$util$launchFullScreen document.getElementById 'rrmd-ui-loader'
+  await Kisume ui.el.loader.contentWindow, defer(kisume)
+  await kisume.set 'util', [], util, defer()
 
   ui.inited = true
   ui.active = false
@@ -60,12 +53,14 @@ ui.show = (cb) ->
   await $(ui.el.loader).fadeIn 250, defer()
   $('#container').hide()
   ui.active = true
+  $('body').offset().left # reflow
   cb?()
 
 ui.hide = (cb) ->
   ui.active = false
   $('#container').show()
   await $(ui.el.loader).fadeOut 250, defer()
+  $('body').offset().left # reflow
   cb?()
 
 ui.getSource = -> ui.el.area.value
