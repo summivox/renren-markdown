@@ -49,19 +49,27 @@ ui.listen = ->
   ui.el.area.addEventListener 'input', (e) -> cron.trig()
   ui.el.commit.addEventListener 'click', (e) -> process.commit()
 
-ui.show = (cb) ->
-  await $(ui.el.loader).fadeIn 250, defer()
-  $('#container').hide()
-  ui.active = true
-  $('body').offset().left # reflow
-  cb?()
+do ->
+  # workaround: reflow error on exiting fullscreen
+  reflow = (autocb) ->
+    o = ui.el.open
+    o.style.float = 'left'
+    await setTimeout defer(), 1
+    o.style.float = 'none'
 
-ui.hide = (cb) ->
-  ui.active = false
-  $('#container').show()
-  await $(ui.el.loader).fadeOut 250, defer()
-  $('body').offset().left # reflow
-  cb?()
+  ui.show = (cb) ->
+    await $(ui.el.loader).fadeIn 250, defer()
+    $('#container').hide()
+    ui.active = true
+    await reflow defer()
+    cb?()
+
+  ui.hide = (cb) ->
+    ui.active = false
+    $('#container').show()
+    await reflow defer()
+    await $(ui.el.loader).fadeOut 250, defer()
+    cb?()
 
 ui.getSource = -> ui.el.area.value
 ui.setSource = (s) -> ui.el.area.value = s
