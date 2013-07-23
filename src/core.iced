@@ -61,7 +61,9 @@ core.spanify = do ->
 
     # special: <pre>-formatting
     if el.tagName == 'PRE'
-      for t in getTextNodes el
+      # first remove initial linebreaks
+      el.innerHTML = el.innerHTML.toString().replace(/^[\n\r]+/, '')
+      for t, i in getTextNodes el
         t2 = document.createElement 'span'
         t2.innerHTML = t.data.toString()
           .replace(/\&/g, '&amp;')
@@ -69,8 +71,10 @@ core.spanify = do ->
           .replace(/>/g, '&gt;')
           .replace(/\t/g, '        ') # tab stop hardcoded to 8
           .replace(/\ /g, '&nbsp;')
-          .replace(/(?!^)[\n\r]/g, '<br/>') # NOTE: initial \n does not count
+          .replace(/[\n\r]/g, '<br/>')
         $(t).replaceWith(t2)
+      # finally remove "whitespace: pre" setting
+      el.style.whiteSpace = ''
 
     cssText = util.dquote_to_squote el.style.cssText # prevent single-double-quote hell
     cont = el.innerHTML.trim() || dummy

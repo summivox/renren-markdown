@@ -78,6 +78,13 @@ postproc.register 'gist', 'a', (autocb) ->
             # workaround: line numbers should not wrap
             $cont.find('.gist-data').each -> @style.whiteSpace||='nowrap'
 
+            # special: promote markdown in gist for correct rendering
+            $cont.find('article.markdown-body').each ->
+              $md = $(this).addClass('rrmd')
+              core.inlineCss this, markdown.cssRules
+              core.inlineCss this, cssRules
+              $md.parentsUntil('div.gist').last().replaceWith($md)
+
             el3 = core.spanify core.inlineCss $cont[0], cssRules
             $(el2).replaceWith(el3)
             cache[id] = el3.cloneNode(true)
