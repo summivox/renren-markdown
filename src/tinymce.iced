@@ -9,7 +9,7 @@ tinymce.init = (autocb) ->
   await window.kisume.runAsync ((cb) ->
     editor = null
     @util.pollUntil 500, (-> editor = window.tinymce?.editors?[0]), =>
-      @tinymce.editor = editor
+      @('tinymce').editor = editor
       cb()
   ), defer(err, ret)
   if err
