@@ -36,7 +36,7 @@ ui.init = (cb) ->
     @open.style.opacity = 0.2 # mark as inactive
   )(defer()) # await ui.el
 
-  await Kisume ui.el.loader.contentWindow, defer(kisume)
+  await kisume = Kisume ui.el.loader.contentWindow, defer()
   await kisume.set 'util', [], util, defer()
 
   ui.inited = true

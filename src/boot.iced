@@ -5,7 +5,7 @@ boot
 $ ->
   # TODO: load settings
   await window.kisume = Kisume window, defer()
-  await window.kisume.set 'util', [], util, defer(err1)
+  await window.kisume.set 'util', [], util, defer()
   await kisume_test defer() # DEBUG
   await
     css.init defer()
@@ -45,6 +45,10 @@ kisume_test = (autocb) ->
 
   await kisume.run (-> @namespace2.var1.x = -100), defer(err)
   console.assert !err?
+
+  await kisume.run (-> window.o), defer(err, ret)
+  console.assert !err?
+  console.assert ret.x == 101 && ret.y == 102
 
   await kisume.get 'namespace2', ['var1'], defer(err, {var1})
   console.assert !err?
