@@ -4,7 +4,7 @@ boot
 
 $ ->
   # TODO: load settings
-  await window.kisume = Kisume window, defer()
+  await window.kisume = Kisume window, {coffee: true}, defer()
   await window.kisume.set 'util', [], util, defer()
   await kisume_test defer() # DEBUG
   await
