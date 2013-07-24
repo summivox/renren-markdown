@@ -13,7 +13,7 @@ module.exports = (grunt) ->
     'grunt-svgmin'
     'grunt-contrib-concat'
     'grunt-contrib-copy'
-    #'grunt-grunticon'
+    'grunt-grunticon'
   ].map (x) -> grunt.loadNpmTasks(x)
 
   # text files -> JSON
@@ -60,7 +60,6 @@ module.exports = (grunt) ->
     @template = {}
     @copy = {}
     @concat = {}
-    #@grunticon = {}
 
     # minify and join libraries
     @uglify.lib =
@@ -190,6 +189,13 @@ module.exports = (grunt) ->
       'concat:aio'
     ]
 
+    # icon
+    @grunticon =
+      icon:
+        options:
+          src: 'images/icon'
+          dest: 'build/grunticon'
+
     # make chrome plugin
     @template.chrome =
       files: [
@@ -199,12 +205,6 @@ module.exports = (grunt) ->
       files: [
         {src: 'build/aio.js', dest: 'dist/chrome/aio.js'}
         {src: 'images/rrmd.png', dest: 'dist/chrome/images/rrmd.png'}
-        #{ # FIXME: build/convert/copy correct images
-          #expand: true
-          #cwd: 'images/'
-          #src: '**/*'
-          #dest: 'dist/chrome/images/'
-        #}
       ]
     grunt.registerTask 'chrome', [
       'template:chrome'

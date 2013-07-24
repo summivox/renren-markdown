@@ -36,13 +36,13 @@ license: CC0
         font-family="SimHei"
         font-weight="bold"
         text-anchor="middle"
-        style="fill:#04b;stroke:#04b;stroke-width:8px"
+        style="fill:#04b;stroke:#04b;stroke-width:8px;text-rendering:geometricPrecision"
         >人</text>
     <text x="145" y="90"
         font-size="72px"
         font-family="SimHei"
         font-weight="bold"
         text-anchor="middle"
-        style="fill:#04b;stroke:#04b;stroke-width:8px"
+        style="fill:#04b;stroke:#04b;stroke-width:8px;text-rendering:geometricPrecision"
         >人</text>
 </svg>
