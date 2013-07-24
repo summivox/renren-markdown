@@ -29,7 +29,7 @@ ui.init = (cb) ->
     @previewCss = @previewDoc.getElementById 'css'
 
     @area = @mainDoc.getElementById 'area'
-    @previewBody = @previewDoc.body
+    @previewWrap = @previewDoc.getElementById 'wrap'
     @commit = @mainDoc.getElementById 'commit'
 
     @open = $(PACKED_HTML['ui-button.html']).prependTo('#title_bg')[0]
@@ -44,10 +44,14 @@ ui.init = (cb) ->
   cb?() # ui.init
 
 ui.listen = ->
-  ui.el.open.style.opacity = 1 # active
+  ui.el.open.style.opacity = 1
+
   ui.el.open.addEventListener 'click', (e) -> process.open()
   ui.el.area.addEventListener 'input', (e) -> cron.trig()
   ui.el.commit.addEventListener 'click', (e) -> process.commit()
+
+  ui.el.area.addEventListener 'scroll', (e) ->
+    util.setScrollRatio ui.el.previewWrap, util.scrollRatio ui.el.area
 
 do ->
   # workaround: reflow error on exiting fullscreen
@@ -74,11 +78,11 @@ do ->
 ui.getSource = -> ui.el.area.value
 ui.setSource = (s) -> ui.el.area.value = s
 
-ui.getPreview = -> ui.el.previewBody.firstElementChild
-ui.setPreview = (el) -> do (body = ui.el.previewBody) ->
-  orig = body.firstElementChild
-  if orig? then body.replaceChild el, orig
-  else body.appendChild el
+ui.getPreview = -> ui.el.previewWrap.firstElementChild
+ui.setPreview = (el) -> do (wrap = ui.el.previewWrap) ->
+  orig = wrap.firstElementChild
+  if orig? then wrap.replaceChild el, orig
+  else wrap.appendChild el
 
 ui.getSourceScroll = -> util.scrollRatio(ui.el.area)
 ui.setPreviewScroll = (ratio) -> null # FIXME: copy dillinger.io impl

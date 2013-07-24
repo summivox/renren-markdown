@@ -49,18 +49,18 @@ util.makeIframe = (doc, id, cb) ->
   ifr
 
 # scrolling
-util.canScroll = (el) -> !! el?.scrollHeight?
+util.canScroll = (el) -> el?.scrollHeight?
 
 util.scrollRange = (el) ->
-  if @canScroll(el) then return null
+  if !@canScroll(el) then return null
   el.scrollHeight - el.clientHeight
 
 util.scrollRatio = (el) ->
-  if @canScroll(el) then return null
+  if !@canScroll(el) then return null
   el.scrollTop / @scrollRange(el)
 
 util.setScrollRatio = (el, ratio) ->
-  if @canScroll(el) then return null
+  if !@canScroll(el) then return null
   if !isFinite(ratio) then return null
   ratio = Math.min(Math.max(ratio, 0), 1)
   el.scrollTop = ratio * @scrollRange(el)
