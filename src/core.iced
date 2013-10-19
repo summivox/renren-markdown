@@ -5,6 +5,9 @@ core
 core = {}
 
 core.inlineCss = do ->
+  # workaround: attribute of root element not selected
+  inlineWrapper = '<span class="rrmd-inlined">'
+
   # workaround: non-standard entries
   valid = (s) -> s && s[0] != '-'
   prune = (s) ->
@@ -24,9 +27,10 @@ core.inlineCss = do ->
     valid(curr.val) && (!prev.val || (!prev.pri && curr.pri))
 
   inlineCss = (rootEl, rules) ->
+    wrapper = $(rootEl).wrap(inlineWrapper)[0]
     for r in rules
       {selectorText: sel, style} = r
-      for el in util.arrayize rootEl.querySelectorAll sel
+      for el in util.arrayize wrapper.querySelectorAll sel
         for key in style
           if !valid(key) then continue
           key = prune(key)
@@ -37,10 +41,12 @@ core.inlineCss = do ->
     return rootEl # inlineCss
 
 # convert almost every element within a container into <span>
-# NOTE: container itself is not converted
+# NOTE:
+# - container itself is not converted
+# - `&nbsp;` is now filtered by renren -- use `&ensp;` instead
 core.spanify = do ->
   # prevent element with empty innerHTML from being stripped
-  dummy = '<span style="display:none;">&nbsp;</span>'
+  dummy = '<span style="display:none;">&ensp;</span>'
 
   getTextNodes = (rootEl) ->
     ret = []
@@ -70,7 +76,7 @@ core.spanify = do ->
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;')
           .replace(/\t/g, '        ') # tab stop hardcoded to 8
-          .replace(/\ /g, '&nbsp;')
+          .replace(/\ /g, '&ensp;')
           .replace(/[\n\r]/g, '<br/>')
         $(t).replaceWith(t2)
       # finally remove "whitespace: pre" setting
