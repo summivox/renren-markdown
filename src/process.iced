@@ -27,6 +27,10 @@ process.open = ->
     ui.show()
 
 process.commit = ->
+  # force full processing cycle
+  process.sync()
+  await process.async defer()
+
   md = ui.getSource()
   el = ui.getPreview()
   core.relayAllImg el
