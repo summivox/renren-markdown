@@ -15,7 +15,6 @@ process.sync = ->
 process._async = (->)
 process.async = (cb) ->
   el = ui.getPreview()
-  core.inlineCss(el, markdown.cssRules)
   process._async(cb)
   process._async = (->)
 
