@@ -78,7 +78,7 @@ do ->
 ui.getSource = -> ui.el.area.value
 ui.setSource = (s) -> ui.el.area.value = s
 
-ui.getPreview = -> ui.el.previewWrap.firstElementChild
+ui.getPreview = -> ui.el.previewWrap #.firstElementChild #NOTE: should return container of span.rrmd
 ui.setPreview = (el) -> do (wrap = ui.el.previewWrap) ->
   orig = wrap.firstElementChild
   if orig? then wrap.replaceChild el, orig
