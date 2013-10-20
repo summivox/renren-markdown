@@ -6,9 +6,10 @@ core = {}
 
 core.inlineCss = do ->
   # workaround: attribute of root element not selected
-  inlineWrapper = '<span class="rrmd-inlined">'
+  wrapped = (el) -> $(el).wrap('<span>').parent()[0]
+  unwrapped = (el) -> $(el).unwrap()[0]
 
-  # workaround: non-standard entries
+  # workaround: non-standard css attributes / values
   valid = (s) -> s && s[0] != '-'
   prune = (s) ->
     if (m = s.match /^(.*)-value$/) && s != 'drop-initial-value'
@@ -27,7 +28,7 @@ core.inlineCss = do ->
     valid(curr.val) && (!prev.val || (!prev.pri && curr.pri))
 
   inlineCss = (rootEl, rules) ->
-    wrapper = $(rootEl).wrap(inlineWrapper)[0]
+    wrapper = wrapped rootEl
     for r in rules
       {selectorText: sel, style} = r
       for el in util.arrayize wrapper.querySelectorAll sel
@@ -38,7 +39,7 @@ core.inlineCss = do ->
           prev = read(el.style, key)
           if canOverride(curr, prev)
             el.style.setProperty(key, curr.val, curr.pri)
-    return rootEl # inlineCss
+    return unwrapped rootEl # inlineCss
 
 # convert almost every element within a container into <span>
 # NOTE:

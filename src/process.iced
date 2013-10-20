@@ -13,8 +13,7 @@ process.sync = ->
 # ensure that each `async` from `postproc.run` is run only once
 process._async = (->)
 process.async = (cb) ->
-  el = ui.getPreview()
-  core.inlineCss(el, markdown.cssRules)
+  markdown.render el = ui.getPreview()
   process._async(cb)
   process._async = (->)
 
