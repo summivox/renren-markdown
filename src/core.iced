@@ -115,6 +115,9 @@ core.spanify = do ->
       ['tbody', 'table-row-group']
       ['tfoot', 'table-footer-group']
       ['table', 'table']
+      ## list
+      ['ol, ul', 'block']
+      ['li', 'list-item']
     ]
       while (x = rootEl.querySelector sel)
         s = getSpan x
@@ -123,9 +126,9 @@ core.spanify = do ->
 
     # style on <a> is pruned, so restore by wrapping
     for el in util.arrayize rootEl.querySelectorAll 'a'
-      cssText = util.dquote_to_squote el.style.cssText # same as above
-      el.style.cssText = ''
-      $(el).wrap("""<span style="#{cssText}" />""")
+      if cssText = util.dquote_to_squote(el.style.cssText).trim()
+        el.style.cssText = ''
+        $(el).wrap("""<span style="#{cssText}" />""")
 
     return rootEl # spanify
 
