@@ -5,7 +5,11 @@ core
 core = {}
 
 core.inlineCss = do ->
-  # workaround: non-standard entries
+  # workaround: attribute of root element not selected
+  wrapped = (el) -> $(el).wrap('<span>').parent()[0]
+  unwrapped = (el) -> $(el).unwrap()[0]
+
+  # workaround: non-standard css attributes / values
   valid = (s) -> s && s[0] != '-'
   prune = (s) ->
     if (m = s.match /^(.*)-value$/) && s != 'drop-initial-value'
@@ -24,9 +28,10 @@ core.inlineCss = do ->
     valid(curr.val) && (!prev.val || (!prev.pri && curr.pri))
 
   inlineCss = (rootEl, rules) ->
+    wrapper = wrapped rootEl
     for r in rules
       {selectorText: sel, style} = r
-      for el in util.arrayize rootEl.querySelectorAll sel
+      for el in util.arrayize wrapper.querySelectorAll sel
         for key in style
           if !valid(key) then continue
           key = prune(key)
@@ -34,13 +39,15 @@ core.inlineCss = do ->
           prev = read(el.style, key)
           if canOverride(curr, prev)
             el.style.setProperty(key, curr.val, curr.pri)
-    return rootEl # inlineCss
+    return unwrapped rootEl # inlineCss
 
 # convert almost every element within a container into <span>
-# NOTE: container itself is not converted
+# NOTE:
+# - container itself is not converted
+# - `&nbsp;` is now filtered by renren -- use `&ensp;` instead
 core.spanify = do ->
   # prevent element with empty innerHTML from being stripped
-  dummy = '<span style="display:none;">&nbsp;</span>'
+  dummy = '<span style="display:none;">&ensp;</span>'
 
   getTextNodes = (rootEl) ->
     ret = []
@@ -70,7 +77,7 @@ core.spanify = do ->
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;')
           .replace(/\t/g, '        ') # tab stop hardcoded to 8
-          .replace(/\ /g, '&nbsp;')
+          .replace(/\ /g, '&ensp;')
           .replace(/[\n\r]/g, '<br/>')
         $(t).replaceWith(t2)
       # finally remove "whitespace: pre" setting
@@ -108,6 +115,9 @@ core.spanify = do ->
       ['tbody', 'table-row-group']
       ['tfoot', 'table-footer-group']
       ['table', 'table']
+      ## list
+      ['ol, ul', 'block']
+      ['li', 'list-item']
     ]
       while (x = rootEl.querySelector sel)
         s = getSpan x
@@ -116,9 +126,9 @@ core.spanify = do ->
 
     # style on <a> is pruned, so restore by wrapping
     for el in util.arrayize rootEl.querySelectorAll 'a'
-      cssText = util.dquote_to_squote el.style.cssText # same as above
-      el.style.cssText = ''
-      $(el).wrap("""<span style="#{cssText}" />""")
+      if cssText = util.dquote_to_squote(el.style.cssText).trim()
+        el.style.cssText = ''
+        $(el).wrap("""<span style="#{cssText}" />""")
 
     return rootEl # spanify
 

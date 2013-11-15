@@ -164,7 +164,7 @@ padding: 0;
     box-sizing: border-box;
 }
 .rrmd hr {
-    background: transparent url(http://assets.github.com/assets/primer/markdown/dirty-shade-3d43d541b0f089487a139219bbf0309c6b1f2cd8.png) repeat-x 0 0;
+    background: transparent url(http://assets.github.com/images/modules/pulls/dirty-shade.png) repeat-x 0 0;
     border: 0 none;
     color: #ccc;
     height: 4px;

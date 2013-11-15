@@ -79,10 +79,10 @@ postproc.register 'gist', 'a', (autocb) ->
             $cont.find('.gist-data').each -> @style.whiteSpace||='nowrap'
 
             # special: promote markdown in gist for correct rendering
-            $cont.find('article.markdown-body').each ->
-              $md = $(this).addClass('rrmd')
-              core.inlineCss this, markdown.cssRules
-              core.inlineCss this, cssRules
+            for md in $cont.find('article.markdown-body')
+              $md = $(md).addClass('rrmd')
+              markdown.render md
+              core.inlineCss md, cssRules
               $md.parentsUntil('div.gist').last().replaceWith($md)
 
             el3 = core.spanify core.inlineCss $cont[0], cssRules
