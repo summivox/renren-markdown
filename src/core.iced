@@ -84,7 +84,13 @@ core.spanify = do ->
       el.style.whiteSpace = ''
 
     cssText = util.dquote_to_squote el.style.cssText # prevent single-double-quote hell
-    cont = el.innerHTML.trim() || dummy
+
+    # circumvent "empty content" filters
+    cont = el.innerHTML.trim()
+    if el.innerText.match /^\s*$/
+      cont = cont.replace /&nbsp;/g, '&ensp;'
+    if !cont then cont = dummy
+
     ret.style.cssText = cssText
     ret.innerHTML = cont
     ret # getSpan
