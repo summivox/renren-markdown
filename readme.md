@@ -1,8 +1,8 @@
 # Renren-Markdown
 
-[Markdown][] and [Gist][] support for http://blog.renren.com/ .
+[Markdown][]-based blog editor for http://blog.renren.com/ .
 
-http://blog.renren.com/ uses a modified version of [TinyMCE][] as its rich-text editor, with extra server-side clean-up. This is supposed to block possible XSS attacks, but as a result, formatting is severely limited. Renren-markdown circumvents this by converting arbitrary [Markdown][], alongside with embedded [Gist][]s, into TinyMCE, with almost all formatting/styling preserved. 
+http://blog.renren.com/ uses a modified version of [TinyMCE][] as its rich-text editor, with extra server-side clean-up. This is supposed to block possible XSS attacks, but as a result, formatting is severely limited. Renren-markdown circumvents this by converting arbitrary [Markdown][], alongside with embedded [Gist][]s and MathJax into TinyMCE, with almost all formatting/styling preserved.
 
 **NOTICE: Renren-Markdown will OVERWRITE existing content in the TinyMCE editor!**
 
@@ -18,7 +18,7 @@ http://blog.renren.com/ uses a modified version of [TinyMCE][] as its rich-text 
 * github markdown styling
 * autolinks to gists are embedded (e.g. `https://gist.github.com/gist/4344334`)
     * markdown content in gists are automatically unwrapped
-* renren emoticons through image syntax (e.g. `![(mb)]()`)
+* LaTeX-like math formulae support through MathJax (**NOTE: Size limited. See below for reasons**)
 
 
 ## Install (userscript)
@@ -33,7 +33,9 @@ http://blog.renren.com/ uses a modified version of [TinyMCE][] as its rich-text 
 
 ## Install (Chrome plugin)
 
-Use chrome store link: https://chrome.google.com/webstore/detail/renren-markdown/iiabjaofopjooifoclbpdmffjlgbplod
+~~Use chrome store link: https://chrome.google.com/webstore/detail/renren-markdown/iiabjaofopjooifoclbpdmffjlgbplod~~
+
+Chrome store entry was not managed by me (although built by Grunt) and is out-of-date, so for now, use the userscript version.
 
 
 ## Build
@@ -53,9 +55,24 @@ Userscript: `dist/gm`
 [Grunt]: http://gruntjs.com/
 
 
+## On MathJax support
+
+Math is pre-rendered locally into PNG then stored within blog content as Data URI. However, as Renren server filters out references to Data URIs, renren-markdown uses a _trampoline server_ `base64-server/base64.coffee` to "convert" the Data URI to a regular image URL. I've limited the size to 8KiB (hard-coded in the server side) due to HTTP Get limitations, but this should be sufficient for normal usage.
+
+
 ## Revision History
 
 (before v0.4.34: not kept)
+
+**2013-12-10 : v1.0.0**
+
+Major rewrite. Didn't have the time to polish it (esp. the UI) so it wasn't released. Now that the old version is mostly broke...
+
+* lots of bugfixes (against new Renren filters)
+* new (but still primitive) UI
+* MathJax
+* major performance improvements (lag-free editing even with "heavy" content)
+* modular design (Gist & MathJax are all "plugins", see `src/postproc/*`)
 
 
 **2013-04-05 : v0.5.5**
