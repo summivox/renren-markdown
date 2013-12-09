@@ -24,7 +24,7 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
   cache = new Lru 100 # TODO: settable
 
   # image from dataUrl
-  getImg = (dataUrl, isDisplay, cached) ->
+  getImg = (dataUrl, isDisplay) ->
     img = document.createElement 'img'
     img.src = dataUrl
     # display-mode math: add back centering
@@ -48,7 +48,7 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
     isDisplay = el.type.match /display/
     if dataUrl = cache.get el.textContent.toString().trim()
       {
-        replaceWith: getImg dataUrl, isDisplay, true
+        replaceWith: getImg dataUrl, isDisplay
       }
     else
       seq = ++n
