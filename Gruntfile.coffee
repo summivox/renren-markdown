@@ -5,202 +5,241 @@ module.exports = (grunt) ->
   ############
   # plugins
 
-  grunt.loadNpmTasks 'grunt-contrib-copy'
-  grunt.loadNpmTasks 'grunt-contrib-concat'
-  grunt.loadNpmTasks 'grunt-contrib-clean'
-  grunt.loadNpmTasks 'grunt-contrib-uglify'
-  grunt.loadNpmTasks 'grunt-contrib-cssmin'
+  [
+    'grunt-contrib-clean'
+    'grunt-iced-coffee'
+    'grunt-contrib-uglify'
+    'grunt-contrib-cssmin'
+    'grunt-svgmin'
+    'grunt-contrib-concat'
+    'grunt-contrib-copy'
+    'grunt-grunticon'
+  ].map (x) -> grunt.loadNpmTasks(x)
 
+  # text files -> JSON
+  grunt.registerMultiTask 'pack', 'pack text files into JSONP', ->
+    path = require 'path'
+    for x in @files
+      o = {}
+      for f in x.src
+        name = path.basename f
+        cont = grunt.file.read f, encoding: 'utf-8'
+        o[name] = cont
+      ret = ";var #{x.name}=#{JSON.stringify(o)};\n"
+      grunt.file.write x.dest, ret, encoding: 'utf-8'
 
-  ############
-  # iced-coffee-script
-
-  grunt.registerMultiTask 'iced', 'Compile IcedCoffeeScript files into JavaScript', ->
-    path = require('path')
-    options = @options(
-      bare: false
-      separator: grunt.util.linefeed
-    )
-    grunt.fail.warn 'Experimental destination wildcards are no longer supported. please refer to README.'   if options.basePath or options.flatten
-    grunt.verbose.writeflags options, 'Options'
-    @files.forEach (f) ->
-      output = f.src.filter((filepath) ->
-        if grunt.file.exists(filepath)
-          true
-        else
-          grunt.log.warn 'Source file \'' + filepath + '\' not found.'
-          false
-      ).map((filepath) ->
-        compileCoffee filepath, options
-      ).join(grunt.util.normalizelf(options.separator))
-      if output.length < 1
-        grunt.log.warn 'Destination not written because compiled files were empty.'
-      else
-        grunt.file.write f.dest, output
-        grunt.log.writeln 'File ' + f.dest + ' created.'
-
-  compileCoffee = (srcFile, options) ->
-    options = grunt.util._.extend filename: srcFile, options
-    srcCode = grunt.file.read srcFile
-    try
-      return require('iced-coffee-script').compile srcCode, options
-    catch e
-      grunt.log.error e
-      grunt.fail.warn 'CoffeeScript failed to compile.'
-
-
-  ############
-  # css2js
-
-  grunt.registerMultiTask 'css2js', 'wrap css into js', ->
-    css=grunt.file.read(@data.src, encoding: 'utf-8')
-    css=css.replace(/\'/g, '\\\'').replace(/[\n\r\v]/g, ' ')
-    js=";var #{@data.name}='#{css}';\n"
-    grunt.file.write(@data.dest, js, encoding: 'utf-8')
-
-
-  ############
   # template
-
   grunt.registerMultiTask 'template', ->
-    for file in @files
-      src=file.src[0]
-      dest=file.dest
-      cont=grunt.template.process grunt.file.read(src, encoding: 'utf-8')
-      cont=cont.replace(/\r\n/g, '\n')
-      grunt.file.write(dest, cont, encoding: 'utf-8')
+    for x in @files
+      cont = ''
+      for src in x.src
+        cont += grunt.template.process grunt.file.read(src, encoding: 'utf-8')
+      cont = cont.replace(/\r\n/g, '\n')
+      grunt.file.write(x.dest, cont, encoding: 'utf-8')
 
 
   ############
-  # setenv
-  grunt.registerMultiTask 'setenv', ->
-    grunt.config.set 'window', @data
+  # config
 
+  grunt.initConfig new ->
+    @pkg = grunt.file.readJSON('package.json')
 
-  ############
-  # main config
-
-  grunt.initConfig
-    pkg: grunt.file.readJSON('package.json')
-
-    iced:
-      all:
-        options:
-          runtime: 'inline'
-        files: [
-          {
-            expand: true
-            cwd: 'src'
-            src: ['**/*.iced']
-            dest: 'build/iced'
-            ext: '.js'
-          }
-        ]
-
-    uglify:
+    # default
+    @clean =
+      build: ['build/*']
+      dist: ['dist/*']
+    @coffee =
+      options:
+        bare: true
+    @uglify =
       options:
         preserveComments: 'some'
-      lib:
-        files:
-          'build/lib/marked.min.js': ['lib/marked.js']
-          'build/lib/specificity.min.js': ['lib/specificity.js']
+    @cssmin = {}
+    @svgmin = {}
+    @pack = {}
+    @template = {}
+    @copy = {}
+    @concat = {}
 
-    cssmin:
-      markdown:
-        files:
-          'build/markdown.min.css': ['src/markdown.css']
+    # minify and join libraries
+    @uglify.lib =
+      options:
+        mangle: false
+      files: [
+        {
+          expand: true
+          cwd: 'lib/'
+          src: ['*.js', '!*.min.js']
+          dest: 'build/lib/'
+        }
+      ]
+    @copy.lib =
+      files: [
+        {
+          expand: true
+          cwd: 'lib/'
+          src: '*.min.js'
+          dest: 'build/lib/'
+        }
+      ]
+    @concat.lib =
+      src: 'build/lib/*.js'
+      dest: 'build/lib.js'
+    grunt.registerTask 'lib', [
+      'uglify:lib'
+      'copy:lib'
+      'concat:lib'
+    ]
 
-    css2js:
-      markdown:
-        name: 'MARKDOWN_CSS'
-        src: 'build/markdown.min.css'
-        dest: 'build/markdown.min.css.js'
+    # minify and pack CSS
+    @cssmin.main =
+      files: [
+        {
+          expand: true
+          cwd: 'src/css/'
+          src: '*.css'
+          dest: 'build/css/'
+        }
+      ]
+    @pack.css =
+      name: 'PACKED_CSS'
+      src: 'build/**/*.css'
+      dest: 'build/packed/css.js'
+    grunt.registerTask 'pack-css', [
+      'cssmin:main'
+      'pack:css'
+    ]
 
-    concat:
-      lib: # all minified libraries
-        src: [
-          'lib/jquery-1.8.2.min.js'
-          'build/lib/marked.min.js'
-          'build/lib/specificity.min.js'
-        ]
-        dest: 'build/lib.js'
-      main: # common code (without compatibility layer)
-        src: [
-          'build/lib.js'
-          'build/markdown.min.css.js'
-          'src/emoticon.js' # TODO: auto emoticon.js
-          'build/iced/renren-markdown.js'
-        ]
-        dest: 'build/renren-markdown.main.js'
-      chrome:
-        src: [
-          'build/iced/chrome/env.js'
-          'build/renren-markdown.main.js'
-        ]
-        dest: 'dist/chrome/js/renren-markdown.chrome.js'
-      gm:
-        src: [
-          'build/metadata.js'
-          'build/iced/gm/env.js'
-          'build/renren-markdown.main.js'
-        ]
-        dest: 'dist/gm/renren-markdown.user.js'
+    # pack HTML
+    @pack.html =
+      name: 'PACKED_HTML'
+      src: 'src/**/*.html'
+      dest: 'build/packed/html.js'
+    grunt.registerTask 'pack-html', [
+      'pack:html'
+    ]
 
-    copy:
-      chrome:
-        files: [
-          {src: 'build/iced/chrome/inject.js', dest: 'dist/chrome/js/inject.js'}
-          {src: 'assets/icon.png', dest: 'dist/chrome/img/icon.png'}
-        ]
+    # join all packed files
+    @concat.pack =
+      src: 'build/packed/*.js'
+      dest: 'build/packed.js'
+    grunt.registerTask 'pack-all', [
+      'pack-css'
+      'pack-html'
+      'concat:pack'
+    ]
 
-    template: # for metadata
-      chrome:
-        files: [
-          {src: 'src/chrome/manifest.json', dest: 'dist/chrome/manifest.json'}
-        ]
-      gm:
-        files: [
-          {src: 'src/gm/metadata.js', dest: 'build/metadata.js'}
-        ]
+    # main code
+    @coffee.main =
+      options:
+        join: true
+        # sourceMap: true
+        runtime: 'window'
+      files: [
+        {src: 'src/*.{iced,coffee}', dest: 'build/main.js'}
+      ]
+    grunt.registerTask 'main', [
+      'coffee:main'
+    ]
 
-    clean:
-      build: ['build/*']
-      release: ['dist/*']
+    # postprocessors
+    @coffee.postproc =
+      options:
+        join: false
+        runtime: 'none'
+      files: [
+        {
+          expand: true
+          cwd: 'src/postproc/'
+          src: '**/*.{iced,coffee}'
+          dest: 'build/postproc/'
+          ext: '.js'
+        }
+      ]
+    @copy.postproc =
+      options:
+        join: false
+      files: [
+        {
+          expand: true
+          cwd: 'src/postproc/'
+          src: '**/*.js'
+          dest: 'build/postproc/'
+        }
+      ]
+    grunt.registerTask 'postproc', [
+      'coffee:postproc'
+      'copy:postproc'
+    ]
 
+    # make all-in-one script (lib + packed + main code + postproc)
+    @concat.aio =
+      files: [
+        {
+          src: [
+            'build/lib.js'
+            'build/packed.js'
+            'build/main.js'
+            'build/postproc/**/*.js'
+          ]
+          dest: 'build/aio.js'
+        }
+      ]
+    grunt.registerTask 'aio', [
+      'concat:aio'
+    ]
 
-  grunt.registerTask 'lib', [
-    'uglify:lib'
-    'concat:lib'
-  ]
+    # icon
+    @grunticon =
+      icon:
+        options:
+          src: 'images/icon'
+          dest: 'build/grunticon'
 
-  grunt.registerTask 'css', [
-    'cssmin:markdown'
-    'css2js:markdown'
-  ]
+    # make chrome plugin
+    @template.chrome =
+      files: [
+        {src: 'src/chrome/manifest.json', dest: 'dist/chrome/manifest.json'}
+      ]
+    @copy.chrome =
+      files: [
+        {src: 'build/aio.js', dest: 'dist/chrome/aio.js'}
+        {src: 'images/rrmd.png', dest: 'dist/chrome/images/rrmd.png'}
+      ]
+    grunt.registerTask 'chrome', [
+      'template:chrome'
+      'copy:chrome'
+    ]
 
-  grunt.registerTask 'prepare', [
-    'lib'
-    'css'
-  ]
+    # make userscript
+    @template.gm =
+      files: [
+        {src: 'src/gm/metadata.js', dest: 'build/metadata.js'}
+      ]
+    @concat.gm =
+      src: [
+        'build/metadata.js'
+        'build/aio.js'
+      ]
+      dest: "dist/gm/#{@pkg.name}.user.js"
+    grunt.registerTask 'gm', [
+      'template:gm'
+      'concat:gm'
+    ]
 
-  grunt.registerTask 'compile', [
-    'iced:all'
-    'concat:main'
-  ]
-
-  grunt.registerTask 'chrome', [
-    'template:chrome'
-    'copy:chrome'
-    'concat:chrome'
-  ]
-
-  grunt.registerTask 'gm', [
-    'template:gm'
-    'concat:gm'
-  ]
+    @ # grunt.initConfig
 
   grunt.registerTask 'default', [
-    'compile'
+    'pack-all'
+    'main'
+    'postproc'
+    'aio'
     'chrome'
     'gm'
+  ]
+
+  grunt.registerTask 'all', [
+    'clean'
+    'lib'
+    'default'
   ]

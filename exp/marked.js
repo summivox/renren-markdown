@@ -1,10 +1,7 @@
-/*!
+/**
  * marked - a markdown parser
  * Copyright (c) 2011-2013, Christopher Jeffrey. (MIT Licensed)
  * https://github.com/chjj/marked
- * 
- * MathJax syntax by smilekzs
- * https://github.com/smilekzs/marked
  */
 
 ;(function() {
