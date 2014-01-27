@@ -107,6 +107,7 @@ core.spanify = do ->
     for [sel, disp] in [
       ['hr', 'block']
       ['s, del', 'inline']
+      ['sup, sub', 'inline']
       ['pre', 'block']
       ['code', 'inline']
       ['div, p, blockquote, q, article', 'block']
