@@ -13,7 +13,7 @@ module.exports = (grunt) ->
     'grunt-svgmin'
     'grunt-contrib-concat'
     'grunt-contrib-copy'
-    'grunt-grunticon'
+    #'grunt-grunticon'
   ].map (x) -> grunt.loadNpmTasks(x)
 
   # text files -> JSON
