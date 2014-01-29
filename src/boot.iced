@@ -7,7 +7,7 @@ if !unsafeWindow? then unsafeWindow = window
 $ ->
   console.log '### renren-markdown starting'
   # TODO: load settings
-  await window.kisume = Kisume unsafeWindow, {coffee: true}, defer()
+  await window.kisume = Kisume unsafeWindow, 'kisume_rrmd', {coffee: true}, defer()
   await window.kisume.set 'util', [], util, defer()
   await
     css.init defer()
