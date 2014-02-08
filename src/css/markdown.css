@@ -143,7 +143,7 @@ padding: 0;
 .rrmd pre>code {
     margin: 0;
     padding: 0;
-    white-space: inherit;
+    white-space: nowrap;
     border: none;
     background: transparent;
 }
