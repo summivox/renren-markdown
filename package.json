@@ -1,16 +1,16 @@
 {"name": "renren-markdown"
 ,"description": "Powerful markdown-based editor for blog.renren.com"
 ,"version": "1.1.1"
-,"homepage": "https://github.com/smilekzs/renren-markdown"
+,"homepage": "https://github.com/summivox/renren-markdown"
 ,"author":
-  {"name": "smilekzs"
+  {"name": "summivox"
   }
 ,"repository":
   {"type": "git"
-  ,"url": "git://github.com/smilekzs/renren-markdown.git"
+  ,"url": "git://github.com/summivox/renren-markdown.git"
   }
 ,"bugs":
-  {"url": "https://github.com/smilekzs/renren-markdown/issues"
+  {"url": "https://github.com/summivox/renren-markdown/issues"
   }
 ,"licenses":
   [ {"type": "MIT"
