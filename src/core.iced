@@ -5,10 +5,6 @@ core
 core = {}
 
 core.inlineCss = do ->
-  # workaround: attribute of root element not selected
-  wrapped = (el) -> $(el).wrap('<span>').parent()[0]
-  unwrapped = (el) -> $(el).unwrap()[0]
-
   # workaround: non-standard css attributes / values
   valid = (s) -> s && s[0] != '-'
   prune = (s) ->
@@ -28,7 +24,7 @@ core.inlineCss = do ->
     valid(curr.val) && (!prev.val || (!prev.pri && curr.pri))
 
   inlineCss = (rootEl, rules) ->
-    wrapper = wrapped rootEl
+    wrapper = util.wrapped rootEl
     for r in rules
       {selectorText: sel, style} = r
       for el in util.arrayize wrapper.querySelectorAll sel
@@ -39,7 +35,8 @@ core.inlineCss = do ->
           prev = read(el.style, key)
           if canOverride(curr, prev)
             el.style.setProperty(key, curr.val, curr.pri)
-    return unwrapped rootEl # inlineCss
+    return util.unwrapped rootEl # inlineCss
+
 
 # convert almost every element within a container into <span>
 # NOTE:
@@ -47,8 +44,36 @@ core.inlineCss = do ->
 # - `&nbsp;` is now filtered by renren -- use `&ensp;` instead
 core.spanify = do ->
   # prevent element with empty innerHTML from being stripped
-  dummy = '<span style="display:none;">&ensp;</span>'
+  DUMMY = '<span style="display:none;">&ensp;</span>'
 
+  # every semantic element is equivalent to <span> with
+  # tagName-decided default value for `display` CSS attr
+  TAG_DISP = {}
+  TAG_DISP[tagName] = disp for tagName in tagNames.toUpperCase().split(', ') for [tagNames, disp] in [
+    ['a', 'inline']
+    ['hr', 'block']
+    ['s, del', 'inline']
+    ['sup, sub', 'inline']
+    ['pre', 'block']
+    ['code', 'inline']
+    ['div, p, blockquote, q, article', 'block']
+    ['h1, h2, h3, h4, h5, h6', 'block']
+    ## table
+    ['td, th', 'table-cell']
+    ['tr', 'table-row']
+    ['caption', 'table-caption']
+    ['col', 'table-column']
+    ['col-group', 'table-column-group']
+    ['thead', 'table-header-group']
+    ['tbody', 'table-row-group']
+    ['tfoot', 'table-footer-group']
+    ['table', 'table']
+    ## list
+    ['ol, ul', 'block']
+    ['li', 'list-item']
+  ]
+
+  # helper: recursively list all text nodes within an element
   getTextNodes = (rootEl) ->
     ret = []
     find = (node) ->
@@ -61,83 +86,81 @@ core.spanify = do ->
     find rootEl
     ret
 
-  # single element => span
-  getSpan = (el) ->
-    if !el? then return $(dummy)
-    ret = document.createElement 'span'
+  # preprocess: transform elements in-place before passing down to children
+  spanifyPre = (el) ->
+    return if !el?
+    {tagName, innerHTML, innerText, style: {cssText}} = el
 
-    # special: <pre>-formatting
-    if el.tagName == 'PRE'
-      # first remove initial linebreaks
-      el.innerHTML = el.innerHTML.toString().replace(/^[\n\r]+/, '')
-      for t, i in getTextNodes el
-        t2 = document.createElement 'span'
-        t2.innerHTML = t.data.toString()
-          .replace(/\&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/\t/g, '        ') # tab stop hardcoded to 8
-          .replace(/\ /g, '&ensp;')
-          .replace(/[\n\r]/g, '<br/>')
-        $(t).replaceWith(t2)
-      # finally remove "whitespace: pre" setting
-      el.style.whiteSpace = ''
+    switch tagName
 
-    cssText = util.dquote_to_squote el.style.cssText # prevent single-double-quote hell
+      when 'PRE' # simulated using HTML entities
+        # remove initial newlines
+        el.innerHTML = innerHTML.toString().replace(/^[\n\r]+/, '') 
+
+        # replace all trouble-makers in-place
+        for t, i in getTextNodes el
+          t2 = document.createElement 'span'
+          t2.innerHTML = t.data.toString()
+            .replace(/\&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\t/g, '        ') # tab stop hardcoded to 8
+            .replace(/\ /g, '&ensp;')
+            .replace(/[\n\r]/g, '<br/>')
+          $(t).replaceWith(t2)
+
+        # finally remove "whitespace: pre" setting
+        el.style.whiteSpace = ''
+
+      when 'CODE' # workaround display/spanify inconsistency
+        el.style.whiteSpace = 'nowrap'
+
+      when 'S', 'DEL' # workaround firefox non-standard text-decoration impl
+        el.style.textDecoration = 'line-through'
+
+    el # spanifyPre
+
+  # postprocess: convert `el` with its already-spanified children into <span>
+  spanifyPost = (el) ->
+    if !el? then return $(DUMMY)
+    {tagName, innerHTML, innerText, style: {cssText}} = el
+    if !(disp = TAG_DISP[tagName])? then return el
 
     # circumvent "empty content" filters
-    cont = el.innerHTML.trim()
-    if el.innerText.match /^\s*$/
-      cont = cont.replace /&nbsp;/g, '&ensp;'
-    if !cont then cont = dummy
+    innerHTML = innerHTML.trim()
+    if innerText.match /^\s*$/
+      innerHTML = innerHTML.replace /&nbsp;/g, '&ensp;'
+    if !innerHTML then innerHTML = DUMMY
 
-    ret.style.cssText = cssText
-    ret.innerHTML = cont
-    ret # getSpan
+    # circumvent stripped <a> style by extra wrapping
+    if tagName == 'A'
+      innerHTML = """<span style="#{cssText}">#{el.outerHTML}</span>"""
 
-  # FIXME: switch to bottom-up tree traversal
-  spanify = (rootEl) ->
-    if !rootEl? then return
+    ret = document.createElement 'span'
+    ret.style.cssText = util.dquote_to_squote(cssText).trim()
+    ret.style.display ||= disp
+    ret.innerHTML = innerHTML
+    ret
 
-    # workaround firefox non-standard text-decoration impl
-    for el in rootEl.querySelectorAll 's, del'
-      el.style.textDecoration = 'line-through'
+  # recursively spanify a whole element tree (in-place)
+  spanifyRecur = (el) ->
+    return if !el?
+    el = spanifyPre el
 
-    # elem => span with "display: xxx"
-    for [sel, disp] in [
-      ['hr', 'block']
-      ['s, del', 'inline']
-      ['sup, sub', 'inline']
-      ['pre', 'block']
-      ['code', 'inline']
-      ['div, p, blockquote, q, article', 'block']
-      ['h1, h2, h3, h4, h5, h6', 'block']
-      ## table
-      ['td, th', 'table-cell']
-      ['tr', 'table-row']
-      ['caption', 'table-caption']
-      ['col', 'table-column']
-      ['col-group', 'table-column-group']
-      ['thead', 'table-header-group']
-      ['tbody', 'table-row-group']
-      ['tfoot', 'table-footer-group']
-      ['table', 'table']
-      ## list
-      ['ol, ul', 'block']
-      ['li', 'list-item']
-    ]
-      while (x = rootEl.querySelector sel)
-        s = getSpan x
-        s.style.display ||= disp
-        $(x).replaceWith(s)
+    child = el.firstElementChild
+    child = spanifyRecur(child).nextElementSibling while child
 
-    # style on <a> is pruned, so restore by wrapping
-    for el in util.arrayize rootEl.querySelectorAll 'a'
-      if cssText = util.dquote_to_squote(el.style.cssText).trim()
-        el.style.cssText = ''
-        $(el).wrap("""<span style="#{cssText}" />""")
+    el2 = spanifyPost el
+    if el != el2
+      $(el).replaceWith el2
+      el = el2
+    el
 
-    return rootEl # spanify
+  # (preserve original semantics: `el` itself remains untouched)
+  spanify = (el) ->
+    $(el).children().each -> spanifyRecur @
+    el
+
 
 # (hidden) message embedded into blog
 do ->

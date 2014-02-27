@@ -11,6 +11,10 @@ util.arrayize = (a) -> if a?.length then [].slice.call(a) else []
 util.squote_to_dquote = (s) -> s.replace /'/g, '"'
 util.dquote_to_squote = (s) -> s.replace /"/g, "'"
 
+# wrap/unwrap, always returning the "outer" element
+util.wrapped = (el) -> $(el).wrap('<span>').parent()[0]
+util.unwrapped = (el) -> $(el).unwrap()[0]
+
 # safely unescape javascript string representation
 util.jsStr = (s) ->
   if !(s = s?.trim()) then return null
