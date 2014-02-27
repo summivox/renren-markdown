@@ -64,6 +64,13 @@ Math is pre-rendered locally into PNG then stored within blog content as Data UR
 
 (before v0.4.34: not kept)
 
+**2014-02-27 : v1.2.0**
+
+Core rewrite -- correctly handling corner cases in deeply-nested lists and a few other issues.
+
+There might be some regression -- please post such occurrences in issues. Thanks.
+
+
 **2013-12-10 : v1.0.0**
 
 Major rewrite. Didn't have the time to polish it (esp. the UI) so it wasn't released. Now that the old version is mostly broke...
