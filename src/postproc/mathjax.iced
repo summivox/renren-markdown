@@ -21,7 +21,9 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
   getTag = (seq) -> "rrmd-pp-mathjax-#{seq}"
 
   # cache
-  cache = new Lru 100 # TODO: settable
+  # TODO: settable
+  # [0] => inline, [1] => display
+  cache = [new Lru 100, new Lru 100]
 
   # image from dataUrl
   getImg = (dataUrl, isDisplay) ->
@@ -45,8 +47,8 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
   }, defer(err)
 
   handler = (el) ->
-    isDisplay = el.type.match /display/
-    if dataUrl = cache.get el.textContent.toString().trim()
+    isDisplay = if el.type.match /display/ then 1 else 0
+    if dataUrl = cache[isDisplay].get el.textContent.toString().trim()
       {
         replaceWith: getImg dataUrl, isDisplay
       }
@@ -78,6 +80,6 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
           $('.' + getTag(seq)).remove()
 
           $(el2).replaceWith(getImg(dataUrl, isDisplay))
-          cache.set el2.textContent.toString().trim(), dataUrl
+          cache[isDisplay].set el2.textContent.toString().trim(), dataUrl
           return
       }
