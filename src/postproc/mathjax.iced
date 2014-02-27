@@ -22,8 +22,10 @@ postproc.register 'mathjax', "script[type^='math/tex']", (autocb) ->
 
   # cache
   # TODO: settable
-  # [0] => inline, [1] => display
-  cache = [new Lru 100, new Lru 100]
+  cache = [
+    new Lru 100 # [0] => inline
+    new Lru 100 # [1] => display
+  ]
 
   # image from dataUrl
   getImg = (dataUrl, isDisplay) ->
