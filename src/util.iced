@@ -45,7 +45,7 @@ util.b64_to_str = (b64) -> decodeURIComponent escape window.atob b64
 util.makeIframe = (doc, id, cb) ->
   ifr = $("""<iframe id="#{id}" style="position:fixed;width:0;height:0;" />""").appendTo(doc.body)[0]
   idoc = ifr.contentDocument
-  $(idoc).ready cb? idoc
+  $(idoc).ready -> cb? idoc
   ifr
 
 # scrolling
