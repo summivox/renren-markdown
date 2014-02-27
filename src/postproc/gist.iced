@@ -12,7 +12,7 @@ postproc.register 'gist', 'a', (autocb) ->
     ([\w\/]+) # gist id (including username)
     ///
   makeUrl = (id) -> "https://gist.github.com/#{id}.js"
-  testUrl = makeUrl('smilekzs/5938692')
+  testUrl = makeUrl('5938692')
 
   # gist styling (remotely loaded)
   cssText = ""
