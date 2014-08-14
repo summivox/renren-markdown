@@ -24,7 +24,7 @@ http://blog.renren.com/ uses a modified version of [TinyMCE][] as its rich-text 
 ## Install (userscript)
 
 1. Install your favorite userscript environment ([GreaseMonkey][]/[TamperMonkey][]/[NinjaKit][]...)
-2. http://userscripts.org/scripts/show/154555
+2. <https://github.com/summivox/renren-markdown/raw/master/dist/gm/renren-markdown.user.js>
 
 [GreaseMonkey]: https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/
 [TamperMonkey]: https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo
