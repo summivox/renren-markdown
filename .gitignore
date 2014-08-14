@@ -1,7 +1,10 @@
+/node_modules
+
 # temp
 /*.old
 
 # grunt
-/node_modules
-/dist
 /build
+
+# distribute pre-built greasemonkey only
+/dist/chrome/*
