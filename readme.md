@@ -1,3 +1,13 @@
+# (lack of) UPDATE NOTICE
+
+1.  Renren has rolled out its completely revamped UI.
+2.  I'm no longer running the LaTeX relay server
+
+Existing blogs will continue to exist (just without any LaTeX), but before I fix UI you can't write new one.
+A minor revision could be released to address the UI problem (and temporarily remove MathJax/LaTeX support).
+
+
+
 # Renren-Markdown
 
 [Markdown][]-based blog editor for http://blog.renren.com/ .
